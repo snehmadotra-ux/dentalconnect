@@ -30,57 +30,42 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
     return "/";
   };
 
+  const roleLabel = role === "DENTIST" ? "Doctor" : role === "PATIENT" ? "Patient" : role === "ADMIN" ? "Admin" : "";
+
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-white border-b border-slate-200/80">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
         {/* Brand */}
         <div
           onClick={() => router.push(getHomeRoute())}
-          className="flex items-center gap-3 cursor-pointer group"
+          className="flex items-center gap-2.5 cursor-pointer"
         >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition">
-            <HeartPulse className="w-6 h-6" />
+          <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white">
+            <HeartPulse className="w-4 h-4 text-sky-400" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-black tracking-tight text-slate-900">
-                Dental<span className="text-sky-600">Connect</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-slate-900 tracking-tight">
+              DentalConnect
+            </span>
+            {role && (
+              <span className="text-[10px] font-mono text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
+                {roleLabel}
               </span>
-              {role && (
-                <span
-                  className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                    role === "ADMIN"
-                      ? "bg-purple-100 text-purple-800 border border-purple-200"
-                      : role === "DENTIST"
-                      ? "bg-sky-100 text-sky-800 border border-sky-200"
-                      : "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                  }`}
-                >
-                  {role === "DENTIST" ? "CLINICAL DOCTOR" : role}
-                </span>
-              )}
-            </div>
-            <p className="text-[11px] text-slate-500 hidden sm:block">
-              {role === "ADMIN"
-                ? "Practice Administration & Governance"
-                : role === "DENTIST"
-                ? "Clinical Practice & Diagnostic Odontogram"
-                : "Personal Dental Health Portal"}
-            </p>
+            )}
           </div>
         </div>
 
-        {/* Dynamic Context Tabs (Only relevant to active view) */}
+        {/* Quiet Context Navigation */}
         {tabs && onTabChange && (
-          <nav className="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-2xl border border-slate-200/80">
+          <nav className="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200/60">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
+                className={`h-7 px-3 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
                   activeTab === tab.id
-                    ? "bg-white text-slate-900 shadow-xs"
+                    ? "bg-white text-slate-900 shadow-2xs"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
@@ -92,32 +77,23 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
         )}
 
         {/* User Identity & Logout */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {user ? (
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50/80 text-xs">
-                <div
-                  className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-white shadow-xs ${
-                    role === "ADMIN"
-                      ? "bg-purple-600"
-                      : role === "DENTIST"
-                      ? "bg-sky-600"
-                      : "bg-emerald-600"
-                  }`}
-                >
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-xs">
+                <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center text-white font-mono text-[11px]">
                   {user.full_name?.charAt(0) || "U"}
                 </div>
                 <div className="text-left hidden sm:block">
-                  <p className="font-bold text-slate-900 leading-tight">{user.full_name}</p>
-                  <p className="text-[10px] text-slate-500">{user.email}</p>
+                  <p className="font-medium text-slate-900 leading-tight text-xs">{user.full_name}</p>
                 </div>
               </div>
 
               <button
                 type="button"
                 onClick={logout}
-                title="Sign Out"
-                className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition"
+                title="Sign out"
+                className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-slate-50 transition-colors"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -127,14 +103,14 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
               <button
                 type="button"
                 onClick={() => router.push("/login")}
-                className="px-4 py-2 text-xs font-bold text-slate-700 hover:text-sky-600 transition"
+                className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 transition-colors"
               >
                 Sign In
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/register")}
-                className="px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl shadow-xs transition flex items-center gap-1.5"
+                className="h-8 px-3 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-1.5"
               >
                 <span>Register</span>
                 <ArrowRight className="w-3.5 h-3.5" />

@@ -249,6 +249,59 @@ def init_tables():
         );
         """)
 
+        # 11. Clinical Treatment Ledgers (Procedures, ADA CDT Codes, Ledger Records)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS treatment_records (
+            id TEXT PRIMARY KEY,
+            patient_id TEXT NOT NULL,
+            dentist_id TEXT NOT NULL,
+            appointment_id TEXT,
+            tooth_number INTEGER,
+            procedure_code TEXT,
+            description TEXT NOT NULL,
+            fee REAL DEFAULT 0.0,
+            status TEXT NOT NULL DEFAULT 'COMPLETED',
+            notes TEXT,
+            performed_at TEXT NOT NULL,
+            FOREIGN KEY (patient_id) REFERENCES patient_profiles(id) ON DELETE CASCADE,
+            FOREIGN KEY (dentist_id) REFERENCES dentist_profiles(id) ON DELETE CASCADE
+        );
+        """)
+
+        # 12. Clinical Documents Store (Radiographs, Consent Forms, Lab Slips)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS clinical_documents (
+            id TEXT PRIMARY KEY,
+            patient_id TEXT NOT NULL,
+            dentist_id TEXT,
+            category TEXT NOT NULL DEFAULT 'XRAY',
+            title TEXT NOT NULL,
+            file_name TEXT NOT NULL,
+            s3_key TEXT NOT NULL,
+            mime_type TEXT DEFAULT 'image/jpeg',
+            file_size INTEGER,
+            notes TEXT,
+            uploaded_at TEXT NOT NULL,
+            FOREIGN KEY (patient_id) REFERENCES patient_profiles(id) ON DELETE CASCADE,
+            FOREIGN KEY (dentist_id) REFERENCES dentist_profiles(id) ON DELETE SET NULL
+        );
+        """)
+
+        # Safely migrate verification_status and extra columns if upgrading existing db
+        migrations = [
+            ("users", "verification_status", "TEXT DEFAULT 'ACTIVE'"),
+            ("dentist_profiles", "verification_status", "TEXT DEFAULT 'PENDING_VERIFICATION'"),
+            ("dentist_profiles", "verified_at", "TEXT"),
+            ("dentist_profiles", "verified_by", "TEXT"),
+        ]
+        for tbl, col, col_def in migrations:
+            try:
+                cur.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} {col_def};")
+                conn.commit()
+            except Exception:
+                if db_type == "postgres":
+                    conn.rollback()
+
         conn.commit()
     finally:
         conn.close()

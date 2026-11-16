@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dentist } from "@/types/dental";
-import { X, Calendar, Clock, User, Stethoscope } from "lucide-react";
+import { X, Calendar } from "lucide-react";
 
 interface AppointmentBookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   dentists: Dentist[];
+  initialDentistId?: string;
   onBook: (data: {
     dentist_id: string;
     start_time: string;
@@ -32,16 +33,27 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
   isOpen,
   onClose,
   dentists,
+  initialDentistId,
   onBook,
 }) => {
   if (!isOpen) return null;
 
-  const [dentistId, setDentistId] = useState(dentists[0]?.id || "");
+  const [dentistId, setDentistId] = useState(
+    initialDentistId || dentists[0]?.id || ""
+  );
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [time, setTime] = useState("10:00");
   const [reason, setReason] = useState(REASONS[0]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialDentistId) {
+      setDentistId(initialDentistId);
+    } else if (dentists[0]?.id && !dentistId) {
+      setDentistId(dentists[0].id);
+    }
+  }, [initialDentistId, dentists]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,34 +78,32 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100">
-        <div className="bg-gradient-to-r from-sky-600 to-cyan-600 text-white p-6 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+      <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200">
+        <div className="p-5 border-b border-slate-200 flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-sky-200" />
-              <h3 className="text-xl font-bold">Book Dental Appointment</h3>
-            </div>
-            <p className="text-xs text-sky-100 mt-1">Schedule your clinical visit with our dental team</p>
+            <h3 className="text-base font-semibold text-slate-900">Book Dental Consultation</h3>
+            <p className="text-xs text-slate-500 mt-0.5">Choose your practitioner and schedule your appointment</p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-white/20 transition text-white/80 hover:text-white"
+            className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* Dentist Selection */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-              Select Dentist / Specialist
+          <div className="space-y-1.5">
+            <label className="block text-xs font-medium text-slate-700">
+              Select Dentist
             </label>
             <select
               value={dentistId}
               onChange={(e) => setDentistId(e.target.value)}
-              className="w-full text-sm rounded-xl border border-slate-200 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+              className="w-full h-10 text-xs rounded-lg border border-slate-300 px-3 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
               required
             >
               {dentists.map((d) => (
@@ -105,14 +115,14 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
           </div>
 
           {/* Reason for Visit */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-              Reason for Visit
+          <div className="space-y-1.5">
+            <label className="block text-xs font-medium text-slate-700">
+              Reason for Consultation
             </label>
             <select
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full text-sm rounded-xl border border-slate-200 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+              className="w-full h-10 text-xs rounded-lg border border-slate-300 px-3 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
             >
               {REASONS.map((r) => (
                 <option key={r} value={r}>
@@ -124,8 +134,8 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
 
           {/* Date & Time */}
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-slate-700">
                 Date
               </label>
               <input
@@ -133,52 +143,52 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 min={new Date().toISOString().split("T")[0]}
-                className="w-full text-sm rounded-xl border border-slate-200 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+                className="w-full h-10 text-xs rounded-lg border border-slate-300 px-3 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
                 required
               />
             </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-medium text-slate-700">
                 Preferred Time
               </label>
               <input
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full text-sm rounded-xl border border-slate-200 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+                className="w-full h-10 text-xs rounded-lg border border-slate-300 px-3 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
                 required
               />
             </div>
           </div>
 
           {/* Symptoms / Notes */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
-              Symptoms or Specific Concerns
+          <div className="space-y-1.5">
+            <label className="block text-xs font-medium text-slate-700">
+              Symptoms or Clinical Notes (Optional)
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="e.g. Sensitivity to hot/cold on the upper right side for the past week..."
+              placeholder="Describe symptoms, sensitivity, or prior treatment..."
               rows={3}
-              className="w-full text-sm rounded-xl border border-slate-200 p-3 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition"
+              className="w-full text-xs rounded-lg border border-slate-300 p-3 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors resize-none"
             />
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-3">
+          <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-800 rounded-xl transition"
+              className="h-9 px-3.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 text-sm font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-xl shadow-md transition disabled:opacity-50"
+              className="h-9 px-4 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
             >
-              {loading ? "Confirming..." : "Confirm Booking"}
+              {loading ? "Scheduling..." : "Confirm Booking"}
             </button>
           </div>
         </form>

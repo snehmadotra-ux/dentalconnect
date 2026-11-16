@@ -40,6 +40,24 @@ class InviteRegisterRequest(BaseModel):
     bio: Optional[str] = None
     consultation_fee: Optional[float] = 90.0
 
+class DentistRegisterRequest(BaseModel):
+    email: EmailStr
+    password: str
+    full_name: str
+    phone: Optional[str] = None
+    license_number: str
+    specialization: Optional[str] = "General Dentistry"
+    years_of_experience: Optional[str] = "5+ years"
+    bio: Optional[str] = None
+    consultation_fee: Optional[float] = 90.0
+
+class DentistRegisterResponse(BaseModel):
+    status: str
+    message: str
+    email: str
+    full_name: str
+    verification_status: str
+
 class SyncProfileRequest(BaseModel):
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None

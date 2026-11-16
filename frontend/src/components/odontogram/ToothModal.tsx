@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { ToothRecord, ToothCondition } from "@/types/dental";
-import { X, Check, AlertCircle } from "lucide-react";
+import { X, Check } from "lucide-react";
 
 interface ToothModalProps {
   tooth: ToothRecord | null;
@@ -14,10 +14,10 @@ interface ToothModalProps {
 }
 
 const CONDITION_OPTIONS: { value: ToothCondition; label: string; color: string; desc: string }[] = [
-  { value: "HEALTHY", label: "Healthy / Sound", color: "bg-emerald-500", desc: "No active decay or pathology" },
+  { value: "HEALTHY", label: "Sound / Healthy", color: "bg-emerald-500", desc: "No active decay or pathology" },
   { value: "CARIES", label: "Caries (Cavity)", color: "bg-rose-500", desc: "Active decay requiring restoration" },
   { value: "FILLING", label: "Restored / Filling", color: "bg-blue-500", desc: "Composite resin or amalgam filling" },
-  { value: "CROWN", label: "Crown / Cap", color: "bg-amber-500", desc: "Full coverage porcelain/ceramic crown" },
+  { value: "CROWN", label: "Crown / Cap", color: "bg-amber-500", desc: "Full coverage porcelain or ceramic crown" },
   { value: "ROOT_CANAL", label: "Root Canal (Endo)", color: "bg-purple-500", desc: "Pulp chamber treated and obturated" },
   { value: "IMPLANT", label: "Dental Implant", color: "bg-indigo-600", desc: "Titanium fixture integrated in bone" },
   { value: "MISSING", label: "Missing / Extracted", color: "bg-slate-400", desc: "Tooth absent from dental arch" },
@@ -25,11 +25,11 @@ const CONDITION_OPTIONS: { value: ToothCondition; label: string; color: string; 
 ];
 
 const SURFACES = [
-  { code: "O", label: "Occlusal (Chewing surface)" },
-  { code: "M", label: "Mesial (Towards midline)" },
-  { code: "D", label: "Distal (Away from midline)" },
-  { code: "B", label: "Buccal / Facial (Cheek side)" },
-  { code: "L", label: "Lingual (Tongue side)" },
+  { code: "O", label: "Occlusal (Chewing)" },
+  { code: "M", label: "Mesial (Midline)" },
+  { code: "D", label: "Distal (Away)" },
+  { code: "B", label: "Buccal (Cheek)" },
+  { code: "L", label: "Lingual (Tongue)" },
 ];
 
 export const ToothModal: React.FC<ToothModalProps> = ({
@@ -76,64 +76,68 @@ export const ToothModal: React.FC<ToothModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+      <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200">
         {/* Header */}
-        <div className="bg-gradient-to-r from-sky-600 to-cyan-600 text-white p-5 flex items-center justify-between">
-          <div>
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="space-y-0.5">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">
-                Universal #{tooth.tooth_number} | FDI #{fdiNumber}
+              <span className="text-xs font-mono font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                Universal #{tooth.tooth_number} • FDI #{fdiNumber}
               </span>
+              <span className="text-xs text-slate-500">Operatory Diagnostic</span>
             </div>
-            <h3 className="text-xl font-bold mt-1">Tooth Clinical Record</h3>
+            <h3 className="text-sm font-semibold text-slate-900">Clinical Tooth Record</h3>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-white/20 transition text-white/80 hover:text-white"
+            className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+        <div className="p-5 space-y-4 max-h-[75vh] overflow-y-auto">
           {/* Condition Selector */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              Condition & Diagnosis
+          <div className="space-y-1.5">
+            <label className="block text-xs font-medium text-slate-700">
+              Diagnostic Condition
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {CONDITION_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
                   disabled={!isDentist}
                   onClick={() => setCondition(opt.value)}
-                  className={`text-left p-3 rounded-xl border transition-all flex items-start gap-2.5 ${
+                  className={`p-2.5 rounded-lg border text-left transition-colors flex items-center justify-between text-xs ${
                     condition === opt.value
-                      ? "border-sky-500 bg-sky-50/60 ring-2 ring-sky-500/20"
-                      : "border-slate-200 hover:border-slate-300 bg-white"
-                  } ${!isDentist ? "cursor-default opacity-80" : ""}`}
+                      ? "border-slate-900 bg-slate-50 font-medium text-slate-900"
+                      : "border-slate-200 hover:border-slate-300 text-slate-600"
+                  }`}
                 >
-                  <span className={`w-3.5 h-3.5 rounded-full mt-0.5 shrink-0 ${opt.color}`} />
-                  <div>
-                    <p className="text-xs font-semibold text-slate-800">{opt.label}</p>
-                    <p className="text-[11px] text-slate-500 leading-tight">{opt.desc}</p>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${opt.color}`} />
+                    <span>{opt.label}</span>
                   </div>
+                  {condition === opt.value && <Check className="w-3.5 h-3.5 text-slate-900" />}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Surfaces */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Affected Surfaces
-            </label>
-            <p className="text-xs text-slate-500 mb-2.5">
-              Select anatomical surfaces involved in decay or restoration:
-            </p>
-            <div className="flex flex-wrap gap-2">
+          {/* Surface Notation (M, D, O, B, L) */}
+          <div className="space-y-1.5 pt-2 border-t border-slate-100">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-medium text-slate-700">
+                Involved Surfaces
+              </label>
+              <span className="text-[11px] font-mono text-slate-500">
+                {selectedSurfaces.join("") || "None"}
+              </span>
+            </div>
+            <div className="grid grid-cols-5 gap-1.5">
               {SURFACES.map((s) => {
                 const isSelected = selectedSurfaces.includes(s.code);
                 return (
@@ -142,59 +146,53 @@ export const ToothModal: React.FC<ToothModalProps> = ({
                     type="button"
                     disabled={!isDentist}
                     onClick={() => toggleSurface(s.code)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
+                    className={`py-2 px-1 text-center rounded-lg border text-xs transition-colors ${
                       isSelected
-                        ? "bg-slate-900 text-white border-slate-900 shadow-sm"
-                        : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
+                        ? "bg-slate-900 text-white border-slate-900 font-medium"
+                        : "bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-300"
                     }`}
                   >
-                    {s.code} - {s.label.split(" ")[0]}
+                    <span className="font-mono font-bold block">{s.code}</span>
+                    <span className="text-[9px] block text-slate-400 truncate">{s.label.split(" ")[0]}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Clinical Notes */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">
-              Clinical Treatment Notes
+          {/* Notes */}
+          <div className="space-y-1.5 pt-2 border-t border-slate-100">
+            <label className="block text-xs font-medium text-slate-700">
+              Clinical Findings & Operative Notes
             </label>
             <textarea
-              disabled={!isDentist}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder={isDentist ? "Enter diagnosis notes, procedure history, or planned intervention..." : "No notes recorded."}
+              disabled={!isDentist}
+              placeholder="e.g., Small occlusal pit caries. Restored with shade A2 nano-hybrid composite..."
               rows={3}
-              className="w-full text-sm rounded-xl border border-slate-200 p-3 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition disabled:bg-slate-50 disabled:text-slate-500"
+              className="w-full text-xs rounded-lg border border-slate-300 p-2.5 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors resize-none disabled:bg-slate-50"
             />
           </div>
-
-          {!isDentist && (
-            <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>You are viewing this chart as a patient. Only licensed dentists can update tooth records.</span>
-            </div>
-          )}
         </div>
 
         {/* Footer */}
-        <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-200/60 rounded-xl transition"
+            className="h-8 px-3.5 text-xs font-medium text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors"
           >
-            Close
+            Cancel
           </button>
           {isDentist && (
             <button
               type="button"
-              disabled={saving}
               onClick={handleSave}
-              className="px-5 py-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 rounded-xl shadow-sm transition flex items-center gap-2 disabled:opacity-50"
+              disabled={saving}
+              className="h-8 px-4 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
             >
-              {saving ? "Saving..." : "Save Record"}
+              {saving ? "Saving..." : "Save Tooth Record"}
             </button>
           )}
         </div>

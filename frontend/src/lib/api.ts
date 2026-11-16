@@ -140,19 +140,16 @@ class ApiClient {
     bio?: string;
     consultation_fee?: number;
   }) {
-    const res = await this.request<{
-      access_token: string;
-      token_type: string;
-      role: string;
-      user_id: string;
-      full_name: string;
+    return this.request<{
+      status: string;
+      message: string;
       email: string;
+      full_name: string;
+      verification_status: string;
     }>("/auth/register/dentist", {
       method: "POST",
       body: JSON.stringify(data),
     });
-    this.setToken(res.access_token);
-    return res;
   }
 
   async getCurrentUser() {
@@ -346,6 +343,111 @@ class ApiClient {
         created_at: string;
       }[]
     >("/admin/invitations");
+  }
+
+  // Doctor License Verification
+  async getPendingVerifications() {
+    return this.request<
+      {
+        dentist_id: string;
+        user_id: string;
+        full_name: string;
+        email: string;
+        phone?: string;
+        license_number: string;
+        specialization: string;
+        years_of_experience: string;
+        consultation_fee: number;
+        bio?: string;
+        verification_status: string;
+        created_at: string;
+      }[]
+    >("/admin/verifications/pending");
+  }
+
+  async approveDentistLicense(dentistId: string) {
+    return this.request<{ status: string; dentist_id: string; message: string }>(
+      `/admin/verifications/${dentistId}/approve`,
+      { method: "POST" }
+    );
+  }
+
+  async rejectDentistLicense(dentistId: string) {
+    return this.request<{ status: string; dentist_id: string; message: string }>(
+      `/admin/verifications/${dentistId}/reject`,
+      { method: "POST" }
+    );
+  }
+
+  // Clinical Documents & Treatment Ledgers
+  async getPatientTreatments(patientId: string) {
+    return this.request<
+      {
+        id: string;
+        patient_id: string;
+        dentist_id: string;
+        dentist_name?: string;
+        appointment_id?: string;
+        tooth_number?: number;
+        procedure_code: string;
+        description: string;
+        fee: number;
+        status: string;
+        notes?: string;
+        performed_at: string;
+      }[]
+    >(`/records/patients/${patientId}/treatments`);
+  }
+
+  async createTreatmentRecord(data: {
+    patient_id: string;
+    appointment_id?: string;
+    tooth_number?: number;
+    procedure_code?: string;
+    description: string;
+    fee?: number;
+    status?: string;
+    notes?: string;
+  }) {
+    return this.request<any>("/records/treatments", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getPatientDocuments(patientId: string) {
+    return this.request<
+      {
+        id: string;
+        patient_id: string;
+        dentist_id?: string;
+        dentist_name?: string;
+        category: string;
+        title: string;
+        file_name: string;
+        s3_key: string;
+        mime_type?: string;
+        file_size?: number;
+        notes?: string;
+        uploaded_at: string;
+      }[]
+    >(`/records/patients/${patientId}/documents`);
+  }
+
+  async createDocumentRecord(data: {
+    patient_id: string;
+    category: string;
+    title: string;
+    file_name: string;
+    s3_key: string;
+    mime_type?: string;
+    file_size?: number;
+    notes?: string;
+  }) {
+    return this.request<any>("/records/documents", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   }
 }
 

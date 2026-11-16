@@ -41,8 +41,8 @@ def seed_database():
     dentist_user_id = str(uuid.uuid4())
     execute(
         """
-        INSERT INTO users (id, email, hashed_password, full_name, phone, role, is_active, created_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO users (id, email, hashed_password, full_name, phone, role, is_active, verification_status, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """,
         (
             dentist_user_id,
@@ -52,6 +52,7 @@ def seed_database():
             "+1 (555) 234-5678",
             "DENTIST",
             1,
+            "ACTIVE",
             now_iso,
         ),
     )
@@ -59,8 +60,8 @@ def seed_database():
     dentist_profile_id = str(uuid.uuid4())
     execute(
         """
-        INSERT INTO dentist_profiles (id, user_id, license_number, specialization, years_of_experience, bio, consultation_fee)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO dentist_profiles (id, user_id, license_number, specialization, years_of_experience, bio, consultation_fee, verification_status, verified_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """,
         (
             dentist_profile_id,
@@ -70,6 +71,8 @@ def seed_database():
             "12 years",
             "Specialist in painless restorative dentistry, endodontics, and clear aligners.",
             90.0,
+            "ACTIVE",
+            now_iso,
         ),
     )
 

@@ -10,6 +10,8 @@ from app.schemas.auth import (
     LoginRequest,
     PatientRegisterRequest,
     InviteRegisterRequest,
+    DentistRegisterRequest,
+    DentistRegisterResponse,
     SyncProfileRequest,
 )
 
@@ -25,8 +27,27 @@ async def login(login_data: LoginRequest):
             detail="Incorrect email or password",
         )
     
+    # Check role-specific verification status
+    if user["role"] == "DENTIST":
+        dentist = query_one("SELECT * FROM dentist_profiles WHERE user_id = %s", (user["id"],))
+        if dentist:
+            v_status = dentist.get("verification_status") or "PENDING_VERIFICATION"
+            if v_status == "PENDING_VERIFICATION":
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Practitioner license verification in progress. An administrator must approve your dental board credentials before you can access the operatory.",
+                )
+            elif v_status == "REJECTED":
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Practitioner credential application was not approved. Please contact the practice administrator.",
+                )
+
     if not user.get("is_active"):
-        raise HTTPException(status_code=400, detail="Account is disabled")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is disabled. Please contact the practice administrator.",
+        )
 
     access_token = create_access_token(
         subject=user["id"],
@@ -113,6 +134,62 @@ async def register_patient(data: PatientRegisterRequest):
         user_id=user_id,
         full_name=data.full_name,
         email=data.email.lower(),
+    )
+
+@router.post("/register/dentist", response_model=DentistRegisterResponse)
+async def register_dentist(data: DentistRegisterRequest):
+    """Practitioner Onboarding: Submits clinical credentials for administrator license verification."""
+    existing = query_one("SELECT id FROM users WHERE email = %s", (data.email.lower(),))
+    if existing:
+        raise HTTPException(status_code=400, detail="An account with this email already exists")
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    user_id = str(uuid.uuid4())
+    dentist_profile_id = str(uuid.uuid4())
+
+    # 1. Create User with role DENTIST, is_active=0 (pending verification)
+    execute(
+        """
+        INSERT INTO users (id, email, hashed_password, full_name, phone, role, is_active, verification_status, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """,
+        (
+            user_id,
+            data.email.lower(),
+            get_password_hash(data.password),
+            data.full_name,
+            data.phone,
+            "DENTIST",
+            0, # Inactive until approved by admin
+            "PENDING_VERIFICATION",
+            now_iso,
+        ),
+    )
+
+    # 2. Create Dentist Profile with PENDING_VERIFICATION
+    execute(
+        """
+        INSERT INTO dentist_profiles (id, user_id, license_number, specialization, years_of_experience, bio, consultation_fee, verification_status)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """,
+        (
+            dentist_profile_id,
+            user_id,
+            data.license_number,
+            data.specialization,
+            data.years_of_experience,
+            data.bio,
+            data.consultation_fee or 90.0,
+            "PENDING_VERIFICATION",
+        ),
+    )
+
+    return DentistRegisterResponse(
+        status="pending_verification",
+        message="Practitioner credentials submitted successfully. Your license is currently undergoing board verification by practice administration.",
+        email=data.email.lower(),
+        full_name=data.full_name,
+        verification_status="PENDING_VERIFICATION",
     )
 
 @router.get("/invitations/{token}")

@@ -117,3 +117,73 @@ async def list_invitations(current_admin: dict = Depends(get_current_admin)):
         FROM invitations
         ORDER BY created_at DESC
     """)
+
+@router.get("/verifications/pending")
+async def list_pending_verifications(current_admin: dict = Depends(get_current_admin)):
+    """List doctor license applications awaiting administrator board verification."""
+    sql = """
+        SELECT d.id as dentist_id, d.user_id, u.full_name, u.email, u.phone,
+               d.license_number, d.specialization, d.years_of_experience,
+               d.consultation_fee, d.bio, d.verification_status, u.created_at
+        FROM dentist_profiles d
+        JOIN users u ON d.user_id = u.id
+        WHERE d.verification_status = 'PENDING_VERIFICATION' OR u.is_active = 0
+        ORDER BY u.created_at DESC
+    """
+    return query_all(sql)
+
+@router.post("/verifications/{dentist_id}/approve")
+async def approve_dentist_license(
+    dentist_id: str,
+    current_admin: dict = Depends(get_current_admin),
+):
+    """Approve a doctor's medical/dental board license and activate their clinical operatory account."""
+    dentist = query_one("SELECT * FROM dentist_profiles WHERE id = %s", (dentist_id,))
+    if not dentist:
+        raise HTTPException(status_code=404, detail="Dentist profile not found")
+
+    now_iso = datetime.now(timezone.utc).isoformat()
+    # 1. Update dentist_profiles
+    execute(
+        """
+        UPDATE dentist_profiles
+        SET verification_status = 'ACTIVE', verified_at = %s, verified_by = %s
+        WHERE id = %s
+        """,
+        (now_iso, current_admin["id"], dentist_id),
+    )
+
+    # 2. Activate user account
+    execute(
+        """
+        UPDATE users
+        SET is_active = 1, verification_status = 'ACTIVE'
+        WHERE id = %s
+        """,
+        (dentist["user_id"],),
+    )
+
+    return {
+        "status": "approved",
+        "dentist_id": dentist_id,
+        "message": f"License {dentist['license_number']} verified and approved. Doctor account is now active.",
+    }
+
+@router.post("/verifications/{dentist_id}/reject")
+async def reject_dentist_license(
+    dentist_id: str,
+    current_admin: dict = Depends(get_current_admin),
+):
+    """Reject a doctor's credential submission."""
+    dentist = query_one("SELECT * FROM dentist_profiles WHERE id = %s", (dentist_id,))
+    if not dentist:
+        raise HTTPException(status_code=404, detail="Dentist profile not found")
+
+    execute("UPDATE dentist_profiles SET verification_status = 'REJECTED' WHERE id = %s", (dentist_id,))
+    execute("UPDATE users SET is_active = 0, verification_status = 'REJECTED' WHERE id = %s", (dentist["user_id"],))
+
+    return {
+        "status": "rejected",
+        "dentist_id": dentist_id,
+        "message": "Practitioner application rejected.",
+    }

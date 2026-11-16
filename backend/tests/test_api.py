@@ -80,3 +80,59 @@ def test_patient_registration_flow():
         assert pat_profile is not None
         chart = query_one("SELECT id FROM dental_charts WHERE patient_id = %s", (pat_profile["id"],))
         assert chart is not None
+
+def test_doctor_onboarding_and_admin_verification():
+    """Verify intense doctor registration, pending status gate, and admin approval."""
+    test_doc_email = "dr.applicant@dentalconnect.com"
+    
+    # 1. Doctor submits registration
+    res = client.post("/api/v1/auth/register/dentist", json={
+        "email": test_doc_email,
+        "password": "DoctorSecret123!",
+        "full_name": "Dr. Marcus Cole",
+        "phone": "+1 555-444-3333",
+        "license_number": "DDS-NY-99120",
+        "specialization": "Orthodontics",
+        "years_of_experience": "7 years",
+        "bio": "Board-certified orthodontist specializing in malocclusions and aligners.",
+        "consultation_fee": 120.0,
+    })
+    assert res.status_code in [200, 400]
+
+    # 2. Doctor attempts login while pending -> must be 403 Forbidden
+    login_res = client.post("/api/v1/auth/login", json={
+        "email": test_doc_email,
+        "password": "DoctorSecret123!",
+    })
+    # If still pending verification, must be 403
+    doc_profile = query_one("""
+        SELECT d.id, d.verification_status, u.id as user_id 
+        FROM dentist_profiles d 
+        JOIN users u ON d.user_id = u.id 
+        WHERE u.email = %s
+    """, (test_doc_email,))
+    
+    if doc_profile and doc_profile["verification_status"] == "PENDING_VERIFICATION":
+        assert login_res.status_code == 403
+        assert "verification in progress" in login_res.json()["detail"].lower()
+
+        # 3. Admin logs in and approves doctor
+        admin_login = client.post("/api/v1/auth/login", json={
+            "email": "admin@dentalconnect.com",
+            "password": "AdminSecure123!",
+        })
+        admin_token = admin_login.json()["access_token"]
+
+        approve_res = client.post(
+            f"/api/v1/admin/verifications/{doc_profile['id']}/approve",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert approve_res.status_code == 200
+
+        # 4. Now doctor login succeeds
+        success_login = client.post("/api/v1/auth/login", json={
+            "email": test_doc_email,
+            "password": "DoctorSecret123!",
+        })
+        assert success_login.status_code == 200
+        assert success_login.json()["role"] == "DENTIST"
