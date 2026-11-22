@@ -32,9 +32,10 @@ class Settings(BaseSettings):
         # Used by Alembic migrations
         return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
-    # ZITADEL Identity Provider
+    # ZITADEL Identity Provider / Clinic Super Admin
     ZITADEL_ISSUER_URL: str = os.getenv("ZITADEL_ISSUER_URL", "http://localhost:8080")
     ZITADEL_INTERNAL_URL: str = os.getenv("ZITADEL_INTERNAL_URL", "http://localhost:8080")
+    ADMIN_EMAIL: str = os.getenv("ADMIN_EMAIL", "admin@dentalconnect.com")
     ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "AdminSecure123!")
 
     # CORS

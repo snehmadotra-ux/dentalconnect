@@ -158,15 +158,31 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## Demo Accounts
+## Origin Story & Day-0 Setup
 
-Pre-seeded clinical accounts ready for instant testing:
+DentalConnect boots with a **clean-slate architecture**: **zero mock users** are pre-seeded into the database. 
 
-| Role | Email | Password | Access Route |
+On initial startup, the backend automatically provisions a single **Clinic Super Administrator** using credentials from `.env`:
+
+| Role | Default Identifier | Default Secret | Route |
 | :--- | :--- | :--- | :--- |
-| **Patient** | `alex@example.com` | `Password123!` | `/patient` |
-| **Dentist** | `dr.vance@dentalconnect.com` | `Password123!` | `/doctor` |
-| **Admin** | `admin@dentalconnect.com` | `AdminSecure123!` | `/admin` |
+| **Clinic Administrator** | `admin@dentalconnect.com` | `AdminSecure123!` | `/admin` |
+
+### The Genesis Onboarding Flow
+
+1. **Administrator Genesis**: Sign in at `/login` using the root administrator credentials. Access `/admin` to monitor stats, issue practitioner invites, or review license applications.
+2. **Practitioner Onboarding**: Doctors sign up via `/register` (select "Doctor / Practitioner") with their medical license number and specialty. Their operatory access remains `PENDING_VERIFICATION` until the Administrator approves their dental board credentials in `/admin`.
+3. **Patient Intake**: Patients register at `/register`. An adult 32-tooth odontogram (Universal numbering 1–32) is automatically provisioned.
+4. **Chairside Operatory**: Once verified, doctors inspect patient odontograms at `/doctor`, record surface caries/restorations, log procedure fees, and issue digital prescriptions.
+
+> **Optional Demo Records**: If you want to populate mock demo accounts (`dr.vance@dentalconnect.com` and `alex@example.com`) for UI review or presentation, run:
+> ```bash
+> cd backend && PYTHONPATH=. ./venv/bin/python app/seed.py --demo
+> ```
+> To return to a clean genesis state at any time:
+> ```bash
+> cd backend && PYTHONPATH=. ./venv/bin/python app/seed.py --clean-slate
+> ```
 
 ---
 

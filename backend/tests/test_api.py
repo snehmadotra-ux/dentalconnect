@@ -30,9 +30,29 @@ def test_unauthenticated_request_rejected():
 
 def test_doctor_login_and_role_guard():
     """Verify dentist authentication and RBAC boundary."""
+    # Ensure active dentist exists for testing RBAC
+    from app.core.db import query_one, execute
+    import uuid
+    from datetime import datetime, timezone
+    doc = query_one("SELECT id FROM users WHERE email = 'dr.test.active@dentalconnect.com'")
+    if not doc:
+        u_id = str(uuid.uuid4())
+        d_id = str(uuid.uuid4())
+        now_iso = datetime.now(timezone.utc).isoformat()
+        execute(
+            "INSERT INTO users (id, email, hashed_password, full_name, phone, role, is_active, verification_status, created_at) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (u_id, "dr.test.active@dentalconnect.com", get_password_hash("DoctorPass123!"), "Dr. Test Active", "+1-555-1111", "DENTIST", 1, "ACTIVE", now_iso)
+        )
+        execute(
+            "INSERT INTO dentist_profiles (id, user_id, license_number, specialization, verification_status) "
+            "VALUES (%s, %s, %s, %s, %s)",
+            (d_id, u_id, "LIC-TEST-ACTIVE", "General", "ACTIVE")
+        )
+
     res = client.post("/api/v1/auth/login", json={
-        "email": "dr.vance@dentalconnect.com",
-        "password": "Password123!",
+        "email": "dr.test.active@dentalconnect.com",
+        "password": "DoctorPass123!",
     })
     assert res.status_code == 200
     doc_token = res.json()["access_token"]

@@ -305,3 +305,36 @@ def init_tables():
         conn.commit()
     finally:
         conn.close()
+
+
+def bootstrap_clinic_admin():
+    """Origin Story: Auto-provisions root System Administrator if no ADMIN account exists.
+    Ensures a fresh setup has zero mock users and exactly one administrator.
+    """
+    from app.core.config import settings
+    from app.core.security import get_password_hash
+    import uuid
+    from datetime import datetime, timezone
+
+    admin = query_one("SELECT id FROM users WHERE role = 'ADMIN' LIMIT 1")
+    if not admin:
+        now_iso = datetime.now(timezone.utc).isoformat()
+        admin_id = str(uuid.uuid4())
+        execute(
+            """
+            INSERT INTO users (id, email, hashed_password, full_name, phone, role, is_active, verification_status, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """,
+            (
+                admin_id,
+                settings.ADMIN_EMAIL.lower(),
+                get_password_hash(settings.ADMIN_PASSWORD),
+                "System Administrator",
+                "+1 (555) 000-0001",
+                "ADMIN",
+                1,
+                "ACTIVE",
+                now_iso,
+            ),
+        )
+        print(f"👑 Root Clinic Administrator auto-provisioned: {settings.ADMIN_EMAIL}")

@@ -1,40 +1,43 @@
+import sys
 import uuid
-from datetime import datetime, timedelta, timezone, date
-from app.core.db import init_tables, query_one, execute
+from datetime import datetime, timedelta, timezone
+from app.core.config import settings
+from app.core.db import init_tables, query_one, execute, bootstrap_clinic_admin
 from app.core.security import get_password_hash
 
-def seed_database():
-    print("🌱 Initializing Tables & Seeding Database (Raw SQL)...")
-    init_tables()
+def clean_slate():
+    """Wipes all clinical records and restores genesis state with Admin only."""
+    print("🧹 Cleaning database to genesis state...")
+    tables = [
+        "prescription_items",
+        "prescriptions",
+        "treatment_records",
+        "clinical_documents",
+        "medical_files",
+        "tooth_records",
+        "dental_charts",
+        "appointments",
+        "invitations",
+        "patient_profiles",
+        "dentist_profiles",
+        "users",
+    ]
+    for tbl in tables:
+        try:
+            execute(f"DELETE FROM {tbl};")
+        except Exception:
+            pass
+    print("  ✓ All records cleared.")
+    bootstrap_clinic_admin()
 
+def seed_demo_users():
+    """Explicitly seeds demo practitioner & patient for local preview/development."""
+    print("🌱 Populating demo clinical data (Dr. Vance & Alex Miller)...")
     now_iso = datetime.now(timezone.utc).isoformat()
 
-    # 0. Clinic Super Administrator (one-time bootstrap)
-    existing_admin = query_one("SELECT id FROM users WHERE email = %s", ("admin@dentalconnect.com",))
-    if not existing_admin:
-        admin_user_id = str(uuid.uuid4())
-        execute(
-            """
-            INSERT INTO users (id, email, hashed_password, full_name, phone, role, is_active, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """,
-            (
-                admin_user_id,
-                "admin@dentalconnect.com",
-                get_password_hash("AdminSecure123!"),
-                "System Administrator",
-                "+1 (555) 000-0001",
-                "ADMIN",
-                1,
-                now_iso,
-            ),
-        )
-        print("  + Seeded Admin: admin@dentalconnect.com")
-
-    # Check if clinical demo data already seeded
     existing = query_one("SELECT id FROM users WHERE email = %s", ("dr.vance@dentalconnect.com",))
     if existing:
-        print("✓ Clinical demo data is already seeded.")
+        print("✓ Clinical demo data is already present.")
         return
 
     # 1. Demo Dentist
@@ -113,7 +116,7 @@ def seed_database():
         ),
     )
 
-    # 3. Create Odontogram Dental Chart (32 teeth)
+    # 3. Odontogram Chart
     chart_id = str(uuid.uuid4())
     execute(
         "INSERT INTO dental_charts (id, patient_id, created_at, updated_at) VALUES (%s, %s, %s, %s)",
@@ -196,26 +199,24 @@ def seed_database():
         ),
     )
 
-    execute(
-        """
-        INSERT INTO prescription_items (id, prescription_id, medication_name, dosage, frequency, duration, instructions)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """,
-        (
-            str(uuid.uuid4()),
-            rx_id,
-            "Ibuprofen 600mg (Oral Tablet)",
-            "600mg",
-            "Every 6 to 8 hours as needed for dental pain",
-            "3 days",
-            "Do not exceed 2400mg per day. Take with food.",
-        ),
-    )
+    print("✅ Demo users seeded successfully!")
 
-    print("✅ Seed completed!")
-    print("  - Admin:   admin@dentalconnect.com (AdminSecure123!)")
-    print("  - Dentist: dr.vance@dentalconnect.com (Password123!)")
-    print("  - Patient: alex@example.com (Password123!)")
+def main():
+    init_tables()
+    
+    if "--clean-slate" in sys.argv:
+        clean_slate()
+        return
+
+    bootstrap_clinic_admin()
+
+    if "--demo" in sys.argv:
+        seed_demo_users()
+    else:
+        print("🏛️ Genesis setup complete: Clean clinic database initialized.")
+        print(f"  - Super Admin: {settings.ADMIN_EMAIL} ({settings.ADMIN_PASSWORD})")
+        print("  - Zero mock patients or dentists seeded (Production / Clean state).")
+        print("  - Run with `--demo` if you want mock demo patients/doctors.")
 
 if __name__ == "__main__":
-    seed_database()
+    main()

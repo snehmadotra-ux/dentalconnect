@@ -5,13 +5,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.core.config import settings
-from app.core.db import init_tables
+from app.core.db import init_tables, bootstrap_clinic_admin
 from app.api.v1.api import api_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize SQL tables on startup
+    # 1. Initialize SQL tables
     init_tables()
+    # 2. Origin Story (Day 0): Auto-provision root Administrator if missing (zero mock users)
+    bootstrap_clinic_admin()
     yield
 
 app = FastAPI(
