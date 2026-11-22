@@ -1,0 +1,129 @@
+---
+title: "REST API Endpoints"
+description: "Complete catalog of endpoints for Auth, Dentists, Patients, Charts, Appointments, Records, and Admin."
+section: "API Reference"
+order: 2
+---
+
+# REST API Endpoints Catalog
+
+DentalConnect exposes 8 endpoint modules organized by clinical domain.
+
+---
+
+## 1. Authentication (`/auth`)
+
+### `POST /auth/login`
+Authenticate with email and password to receive a Bearer JWT token.
+- **Request Body**:
+  ```json
+  {
+    "email": "dr.vance@dentalconnect.com",
+    "password": "Password123!"
+  }
+  ```
+- **Response `200 OK`**:
+  ```json
+  {
+    "access_token": "eyJhbGciOi...",
+    "token_type": "bearer",
+    "role": "DENTIST",
+    "user_id": "353c77d7-...",
+    "full_name": "Dr. Sarah Vance, DDS",
+    "email": "dr.vance@dentalconnect.com"
+  }
+  ```
+
+### `GET /auth/me`
+Retrieve profile of currently authenticated user.
+- **Headers**: `Authorization: Bearer <token>`
+
+---
+
+## 2. Odontogram & Dental Charts (`/charts`)
+
+### `GET /charts/patients/{patient_id}`
+Retrieve the full 32-tooth odontogram for a patient.
+- **Response**: Array of 32 teeth with conditions, surfaces (`MODBL`), and notes.
+
+### `PATCH /charts/patients/{patient_id}/teeth/{tooth_number}`
+Update diagnosis for a specific tooth (1 to 32). *(Dentist only)*
+- **Request Body**:
+  ```json
+  {
+    "condition": "CARIES",
+    "surfaces": "MOD",
+    "notes": "Mesial and occlusal decay."
+  }
+  ```
+
+---
+
+## 3. Appointments (`/appointments`)
+
+### `GET /appointments/`
+List scheduled appointments (filtered automatically by caller's role).
+
+### `POST /appointments/`
+Book a new appointment slot.
+- **Request Body**:
+  ```json
+  {
+    "dentist_id": "uuid",
+    "patient_id": "uuid",
+    "start_time": "2026-11-25T10:00:00Z",
+    "end_time": "2026-11-25T10:45:00Z",
+    "reason": "Root canal consultation",
+    "clinical_notes": "Severe toothache on lower left molar"
+  }
+  ```
+
+### `PATCH /appointments/{id}`
+Update appointment status (`CONFIRMED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`).
+
+---
+
+## 4. Prescriptions (`/prescriptions`)
+
+### `GET /prescriptions/`
+Retrieve prescriptions with itemized medications.
+
+---
+
+## 5. Clinical Records & Ledgers (`/records`)
+
+### `GET /records/patients/{patient_id}/treatments`
+Fetch treatment procedure ledger entries by ADA/CDT code.
+
+### `POST /records/treatments`
+Log an ADA/CDT procedure entry.
+- **Request Body**:
+  ```json
+  {
+    "patient_id": "uuid",
+    "tooth_number": 14,
+    "procedure_code": "D2393",
+    "description": "Composite resin - 3 surfaces (MOD)",
+    "fee": 280.0,
+    "status": "COMPLETED"
+  }
+  ```
+
+### `GET /records/patients/{patient_id}/documents`
+Retrieve radiographic document metadata (X-Rays, CBCT, lab slips).
+
+---
+
+## 6. Administration (`/admin`)
+
+### `GET /admin/stats`
+Practice-wide analytics (patient counts, active appointments, active caries count).
+
+### `GET /admin/verifications/pending`
+List doctors awaiting medical board license review.
+
+### `POST /admin/verifications/{dentist_id}/approve`
+Approve doctor license and activate operatory account.
+
+### `POST /admin/invitations`
+Generate tokenized invite URL for doctor/staff onboarding.

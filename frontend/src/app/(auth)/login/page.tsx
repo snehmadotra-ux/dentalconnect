@@ -2,222 +2,146 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { api } from "@/lib/api";
+import { useAuth, UserSession } from "@/context/AuthContext";
 import {
   HeartPulse,
   Lock,
   Mail,
   ArrowRight,
-  ShieldCheck,
-  Stethoscope,
-  KeyRound,
+  Eye,
+  EyeOff,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const router = useRouter();
+
+  const routeUserToPortal = (authenticatedUser: UserSession) => {
+    const role = (authenticatedUser.role || "PATIENT").toUpperCase();
+    if (role === "ADMIN") router.push("/admin");
+    else if (role === "DENTIST") router.push("/doctor");
+    else router.push("/patient");
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) return;
+
     setError(null);
     setLoading(true);
     try {
-      const user = await login(email, password);
-      if (user.role === "ADMIN") {
-        router.push("/admin");
-      } else if (user.role === "DENTIST") {
-        router.push("/doctor");
-      } else {
-        router.push("/patient");
-      }
+      const loggedInUser = await login(email.trim(), password);
+      routeUserToPortal(loggedInUser);
     } catch (err: any) {
-      setError(err.message || "Invalid credentials. Please verify your email and password.");
+      setError(err.message || "Invalid email or password.");
     } finally {
       setLoading(false);
     }
   };
 
-  const fillDemoAccount = (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword("password123");
-    setError(null);
-  };
-
-  const handleZitadelLogin = () => {
-    const url = api.getZitadelLoginUrl();
-    window.location.href = url;
-  };
-
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#fafafa]">
-      {/* Left Brand Panel */}
-      <div className="md:w-5/12 bg-slate-900 text-white p-8 sm:p-12 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800">
-        <div className="space-y-6">
-          <Link href="/" className="inline-flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-white">
-              <HeartPulse className="w-4 h-4 text-sky-400" />
-            </div>
-            <div>
-              <span className="text-sm font-semibold tracking-tight">DentalConnect</span>
-              <span className="block text-[11px] text-slate-400">Oral Care Network</span>
-            </div>
-          </Link>
-
-          <div className="pt-8 space-y-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-white">
-              Clinical and Patient Portal
-            </h1>
-            <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-              Sign in with your email address. DentalConnect routes your account to your personalized health records, chairside operatory, or admin console.
-            </p>
-          </div>
-        </div>
-
-        {/* Feature Points */}
-        <div className="pt-8 space-y-3 border-t border-slate-800">
-          <div className="flex items-center gap-2.5 text-xs text-slate-400">
-            <ShieldCheck className="w-4 h-4 text-slate-400" />
-            <span>Encrypted clinical records and ADA CDT procedure ledgers</span>
-          </div>
-          <div className="flex items-center gap-2.5 text-xs text-slate-400">
-            <Stethoscope className="w-4 h-4 text-slate-400" />
-            <span>Interactive 32-tooth anatomical odontogram</span>
-          </div>
-        </div>
+    <div className="relative min-h-screen bg-[#070a12] text-white flex flex-col justify-between selection:bg-cyan-500 selection:text-white antialiased">
+      {/* Background Glows */}
+      <div className="absolute inset-0 pointer-events-none select-none overflow-hidden flex flex-col justify-center items-center z-0">
+        <div className="w-[600px] h-[400px] bg-cyan-500/[0.04] rounded-full blur-[160px] absolute -top-20 left-1/2 -translate-x-1/2" />
       </div>
 
-      {/* Right Login Form Panel */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
-        <div className="max-w-md w-full space-y-6 bg-white p-8 rounded-xl border border-slate-200/80 shadow-2xs">
-          <div>
-            <h2 className="text-xl font-semibold text-slate-900 tracking-tight">Sign In</h2>
-            <p className="text-xs text-slate-500 mt-1">
-              Enter your clinical credentials to access your portal
-            </p>
+      {/* Header */}
+      <header className="relative z-10 h-16 sm:h-20 max-w-7xl w-full mx-auto px-6 sm:px-10 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-9 h-9 rounded-xl bg-white text-slate-950 flex items-center justify-center font-bold shadow-lg transition-transform duration-200 group-hover:scale-105">
+            <HeartPulse className="w-5 h-5 text-cyan-500" />
           </div>
+          <span className="text-xl font-bold tracking-tight text-white">
+            Dental Connect
+          </span>
+        </Link>
+      </header>
+
+      {/* Centered Sign In Card */}
+      <main className="relative z-10 flex-1 max-w-md w-full mx-auto px-6 py-8 flex flex-col justify-center items-center my-auto">
+        <div className="w-full bg-slate-900/80 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl space-y-6">
+          <h1 className="text-2xl font-bold text-white tracking-tight">Sign In</h1>
 
           {error && (
-            <div className={`p-3.5 rounded-lg text-xs space-y-1 ${
-              error.includes("verification in progress")
-                ? "bg-amber-50 border border-amber-200 text-amber-900"
-                : "bg-rose-50 border border-rose-200 text-rose-800"
-            }`}>
-              <div className="font-medium flex items-center gap-1.5">
-                {error.includes("verification in progress") ? (
-                  <>
-                    <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                    <span>License Verification Underway</span>
-                  </>
-                ) : (
-                  <span>Authentication Notice</span>
-                )}
-              </div>
-              <p className="text-slate-600 leading-relaxed">{error}</p>
+            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
+              <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-700">
-                Email address
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full h-10 text-xs pl-9 pr-3 rounded-lg border border-slate-300 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
-                  required
-                />
-              </div>
+            <div className="relative">
+              <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-4" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email address"
+                className="w-full h-12 text-sm pl-10 pr-4 rounded-xl bg-slate-950/70 border border-slate-800 text-white placeholder:text-slate-500 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all duration-200"
+                required
+              />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-700">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  className="w-full h-10 text-xs pl-9 pr-3 rounded-lg border border-slate-300 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
-                  required
-                />
-              </div>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-4" />
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="w-full h-12 text-sm pl-10 pr-10 rounded-xl bg-slate-950/70 border border-slate-800 text-white placeholder:text-slate-500 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all duration-200 font-mono"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-4 text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-10 rounded-lg font-medium text-xs text-white bg-slate-900 hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full h-12 bg-white hover:bg-slate-200 disabled:opacity-50 text-slate-950 font-bold text-sm rounded-xl transition-all duration-200 hover:shadow-xl active:scale-[0.99] flex items-center justify-center gap-2 mt-2"
             >
-              <span>{loading ? "Authenticating..." : "Sign In"}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
 
-          {/* ZITADEL SSO Button */}
-          <div className="pt-1">
-            <button
-              type="button"
-              onClick={handleZitadelLogin}
-              className="w-full h-10 rounded-lg font-medium text-xs text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 transition-colors flex items-center justify-center gap-2"
-            >
-              <KeyRound className="w-4 h-4 text-slate-500" />
-              <span>Sign in with ZITADEL SSO</span>
-            </button>
-          </div>
-
-          {/* Quick Demo Pre-fills */}
-          <div className="pt-3 border-t border-slate-100">
-            <p className="text-[11px] text-slate-400 mb-2">Quick Sign-In (Demo Accounts):</p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => fillDemoAccount("dr.vance@dentalconnect.com")}
-                className="h-8 px-2 rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] text-slate-700 font-medium transition-colors text-center truncate"
-              >
-                Dr. Vance (Doctor)
-              </button>
-              <button
-                type="button"
-                onClick={() => fillDemoAccount("patient@dentalconnect.com")}
-                className="h-8 px-2 rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] text-slate-700 font-medium transition-colors text-center truncate"
-              >
-                Jane Doe (Patient)
-              </button>
-              <button
-                type="button"
-                onClick={() => fillDemoAccount("admin@dentalconnect.com")}
-                className="h-8 px-2 rounded-md border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] text-slate-700 font-medium transition-colors text-center truncate"
-              >
-                Admin (Governance)
-              </button>
-            </div>
-          </div>
-
-          <div className="pt-2 text-center text-xs text-slate-500">
-            Don&apos;t have an account yet?{" "}
-            <Link
-              href="/register"
-              className="font-medium text-slate-900 hover:underline"
-            >
-              Register here
+          <div className="pt-2 text-center text-xs text-slate-400">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="text-white hover:text-cyan-400 font-semibold transition-colors">
+              Sign Up
             </Link>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 h-16 max-w-7xl w-full mx-auto px-6 sm:px-10 flex items-center justify-center text-xs text-slate-500 border-t border-white/5">
+        <p>© Dental Connect</p>
+      </footer>
     </div>
   );
 }

@@ -1,0 +1,92 @@
+---
+title: "Quickstart Guide"
+description: "Run DentalConnect locally using Docker or native development servers."
+section: "Getting Started"
+order: 2
+---
+
+# Quickstart Guide
+
+Get DentalConnect up and running locally in minutes. You can run the entire platform using Docker Compose or boot the frontend and backend natively on your development machine.
+
+---
+
+## Prerequisites
+
+Ensure you have the following installed on your host machine:
+- **Python**: 3.12+
+- **Node.js**: v20+ LTS and `npm`
+- **Docker & Docker Compose**: v2+
+
+*(If running on Ubuntu/Debian/Zorin OS, you can run `./setup-prereqs.sh` to install all system dependencies automatically).*
+
+---
+
+## Option A: Full Docker Stack (Recommended)
+
+Run the entire ecosystem—PostgreSQL 16, Redis 7, MinIO S3, FastAPI Backend, and Next.js Frontend—with one command:
+
+```bash
+docker compose up -d
+```
+
+### Access URLs
+| Service | URL | Default Credentials |
+|---|---|---|
+| **Web Application** | `http://localhost:3000` | See demo accounts below |
+| **Swagger API Docs** | `http://localhost:8000/docs` | Public interactive explorer |
+| **MinIO Console** | `http://localhost:9001` | User: `minio_admin`<br/>Pass: `minio_secret_key` |
+
+### Seed Demo Data
+To seed initial dentists, patients, appointments, and pre-marked 32-tooth dental charts:
+```bash
+docker compose exec backend python app/seed.py
+```
+
+---
+
+## Option B: Local Native Development
+
+If you are actively developing and want instant hot-reloading:
+
+### 1. Launch Infrastructure Containers
+```bash
+docker compose up -d db redis minio
+```
+
+### 2. Start Python FastAPI Backend
+```bash
+cd backend
+source venv/bin/activate
+pip install -r requirements.txt
+python app/seed.py
+uvicorn app.main:app --reload --port 8000
+```
+
+### 3. Start Next.js Frontend
+In a new terminal window:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Visit `http://localhost:3000` in your browser.
+
+---
+
+## Demo Accounts
+
+The database seeder pre-configures test accounts with realistic clinical histories:
+
+| Role | Email | Password | Direct Portal Route |
+|---|---|---|---|
+| **Dentist** | `dr.vance@dentalconnect.com` | `Password123!` | `/doctor` |
+| **Patient** | `alex@example.com` | `Password123!` | `/patient` |
+| **Administrator** | *(See below)* | `Password123!` | `/admin` |
+
+> **To promote an account to Admin**:
+> In local development, you can register any account and run:
+> ```sql
+> UPDATE users SET role = 'ADMIN' WHERE email = 'your-email@example.com';
+> ```

@@ -1,0 +1,62 @@
+---
+title: "Role-Based Access Control (RBAC)"
+description: "User roles, permissions matrix, JWT tokens, and client route protection."
+section: "Administration & Security"
+order: 1
+---
+
+# Role-Based Access Control (RBAC)
+
+DentalConnect implements a strict Role-Based Access Control (RBAC) model to ensure that clinical records, doctor operatories, and practice financials remain compartmentalized.
+
+---
+
+## Roles & Permissions Matrix
+
+The platform recognizes four primary roles:
+
+| Feature / Resource | `PATIENT` | `DENTIST` | `STAFF` | `ADMIN` |
+|---|:---:|:---:|:---:|:---:|
+| **View Own Dental Chart** | ✅ | ✅ | ❌ | ✅ |
+| **Edit Odontogram & Teeth Status**| ❌ | ✅ | ❌ | ✅ |
+| **Book Own Appointment** | ✅ | ✅ | ✅ | ✅ |
+| **Update Appointment Status** | ❌ | ✅ | ✅ | ✅ |
+| **Issue Digital Prescriptions** | ❌ | ✅ | ❌ | ✅ |
+| **View All Patient Charts** | ❌ | ✅ | ✅ | ✅ |
+| **Log ADA/CDT Treatment Procedures**| ❌ | ✅ | ❌ | ✅ |
+| **Approve Doctor Board Licenses** | ❌ | ❌ | ❌ | ✅ |
+| **Invite New Doctors & Staff** | ❌ | ❌ | ❌ | ✅ |
+| **Practice-Wide Analytics** | ❌ | ❌ | ❌ | ✅ |
+
+---
+
+## Authentication Mechanism
+
+1. **Password Encryption**: Passwords are saved as one-way salted hashes using `bcrypt` (`passlib`).
+2. **Stateless JWT Tokens**:
+   - Algorithm: `HS256`.
+   - Payload contains `sub` (User UUID), `role` (`ADMIN | DENTIST | PATIENT | STAFF`), and `exp` (24-hour TTL).
+3. **API Dependency Guards**:
+   - `get_current_user`: Validates token and checks `is_active == 1`.
+   - `get_current_dentist`: Asserts role is `DENTIST` or `ADMIN`.
+   - `get_current_admin`: Asserts role is `ADMIN`.
+
+---
+
+## Frontend Route Guards (`useRoleGuard`)
+
+On the Next.js frontend, each dedicated portal (`/doctor`, `/patient`, `/admin`) is wrapped by the `useRoleGuard` hook:
+
+```tsx
+// src/app/doctor/page.tsx
+export default function DoctorPortal() {
+  const { isAuthorized, user, isLoading } = useRoleGuard(["DENTIST", "ADMIN"]);
+
+  if (isLoading) return <LoadingSpinner />;
+  if (!isAuthorized) return null; // Automatically routed away
+
+  return <ClinicalDashboard user={user} />;
+}
+```
+
+If an unauthorized user attempts to open `/doctor`, they are bounced to `/login` or their valid portal without exposing clinical UI elements.

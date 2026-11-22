@@ -1,0 +1,50 @@
+{
+  "name": "DentalConnect Docs",
+  "version": "1.0.0",
+  "description": "Official documentation for DentalConnect clinical practice and telehealth platform.",
+  "theme": {
+    "primaryColor": "#0ea5e9"
+  },
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "getting-started/introduction",
+        "getting-started/quickstart",
+        "getting-started/architecture"
+      ]
+    },
+    {
+      "group": "Clinical Features",
+      "pages": [
+        "clinical-features/odontogram",
+        "clinical-features/appointments",
+        "clinical-features/prescriptions",
+        "clinical-features/treatment-ledger",
+        "clinical-features/clinical-documents"
+      ]
+    },
+    {
+      "group": "Administration & Security",
+      "pages": [
+        "administration/rbac",
+        "administration/dentist-verification",
+        "administration/invitations",
+        "administration/compliance-security"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": [
+        "api-reference/overview",
+        "api-reference/endpoints"
+      ]
+    },
+    {
+      "group": "DevOps & Deployment",
+      "pages": [
+        "devops/docker-and-database"
+      ]
+    }
+  ]
+}

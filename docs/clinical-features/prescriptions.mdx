@@ -1,0 +1,46 @@
+---
+title: "Digital Prescriptions"
+description: "Electronic prescription generation, dosage, frequency, and pharmacy instructions."
+section: "Clinical Features"
+order: 3
+---
+
+# Digital Prescriptions
+
+DentalConnect allows licensed practitioners to generate clear, structured digital prescriptions (Rx) tied directly to patient visits.
+
+---
+
+## Structure of a Digital Prescription
+
+A prescription record in DentalConnect consists of:
+1. **Prescription Header**:
+   - Issuing Dentist's full legal name, board license number, and clinic contact.
+   - Patient identity, date of birth, and known allergies (e.g. *Penicillin allergy*).
+   - Date and time of issuance.
+2. **Itemized Medications (`prescription_items`)**:
+   - **Medication Name**: Generic / brand formulation (e.g. `Amoxicillin 500mg (Oral Capsule)`).
+   - **Dosage**: Specific unit measure (e.g. `500mg`, `1 tablet`).
+   - **Frequency**: Clear timing intervals (e.g. `Three times daily (every 8 hours)`).
+   - **Duration**: Total course length (e.g. `7 days`).
+   - **Instructions / Precautions**: Clinical guidance (e.g. `Take with full glass of water after food. Complete entire course.`).
+3. **Clinical Notes**: Post-operative care guidelines or warnings.
+
+---
+
+## Common Dental Formulations
+
+The built-in prescription catalog includes standard dental therapeutics:
+
+| Drug Category | Common Medication | Typical Dosage | Clinical Purpose |
+|---|---|---|---|
+| **Antibiotic** | Amoxicillin | 500mg q8h x 7d | Acute odontogenic infection or post-surgical prophylaxis. |
+| **Antibiotic (Penicillin Allergy)**| Clindamycin | 300mg q6h x 7d | Alternative for penicillin-allergic patients. |
+| **NSAID Analgesic** | Ibuprofen | 600mg q6h PRN | Post-op inflammation and dental pain management. |
+| **Antiseptic Rinse** | Chlorhexidine Gluconate 0.12% | 15ml rinse BID x 14d | Periodontal pocket decontamination & dry socket prevention. |
+
+---
+
+## Patient Safety & Allergy Cross-Check
+
+The patient profile displays active medical allergies (such as Penicillin, Latex, or Codeine). When issuing a prescription, the practitioner can reference these alerts directly from the clinical dashboard before submission.

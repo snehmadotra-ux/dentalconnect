@@ -78,17 +78,16 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200">
-        <div className="p-5 border-b border-slate-200 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
+      <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden text-white">
+        <div className="p-5 border-b border-white/10 flex items-center justify-between">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">Book Dental Consultation</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Choose your practitioner and schedule your appointment</p>
+            <h3 className="text-base font-bold text-white">Book Dental Consultation</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -97,18 +96,18 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* Dentist Selection */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-medium text-slate-700">
+            <label className="block text-xs font-semibold text-slate-300">
               Select Dentist
             </label>
             <select
               value={dentistId}
               onChange={(e) => setDentistId(e.target.value)}
-              className="w-full h-10 text-xs rounded-lg border border-slate-300 px-3 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
+              className="w-full h-11 text-xs rounded-xl border border-slate-800 px-3 bg-slate-950/80 text-white focus:outline-none focus:border-white transition-colors"
               required
             >
               {dentists.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name} — {d.specialization} (${d.consultation_fee})
+                <option key={d.id} value={d.id} className="bg-slate-900 text-white">
+                  {d.name} ({d.specialization}, ${d.consultation_fee})
                 </option>
               ))}
             </select>
@@ -116,16 +115,16 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
 
           {/* Reason for Visit */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-medium text-slate-700">
+            <label className="block text-xs font-semibold text-slate-300">
               Reason for Consultation
             </label>
             <select
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full h-10 text-xs rounded-lg border border-slate-300 px-3 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
+              className="w-full h-11 text-xs rounded-xl border border-slate-800 px-3 bg-slate-950/80 text-white focus:outline-none focus:border-white transition-colors"
             >
               {REASONS.map((r) => (
-                <option key={r} value={r}>
+                <option key={r} value={r} className="bg-slate-900 text-white">
                   {r}
                 </option>
               ))}
@@ -135,7 +134,7 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
           {/* Date & Time */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-700">
+              <label className="block text-xs font-semibold text-slate-300">
                 Date
               </label>
               <input
@@ -143,19 +142,19 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 min={new Date().toISOString().split("T")[0]}
-                className="w-full h-10 text-xs rounded-lg border border-slate-300 px-3 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
+                className="w-full h-11 text-xs rounded-xl border border-slate-800 px-3 bg-slate-950/80 text-white focus:outline-none focus:border-white transition-colors"
                 required
               />
             </div>
             <div className="space-y-1.5">
-              <label className="block text-xs font-medium text-slate-700">
-                Preferred Time
+              <label className="block text-xs font-semibold text-slate-300">
+                Time
               </label>
               <input
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full h-10 text-xs rounded-lg border border-slate-300 px-3 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors"
+                className="w-full h-11 text-xs rounded-xl border border-slate-800 px-3 bg-slate-950/80 text-white focus:outline-none focus:border-white transition-colors"
                 required
               />
             </div>
@@ -163,30 +162,30 @@ export const AppointmentBookingModal: React.FC<AppointmentBookingModalProps> = (
 
           {/* Symptoms / Notes */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-medium text-slate-700">
+            <label className="block text-xs font-semibold text-slate-300">
               Symptoms or Clinical Notes (Optional)
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Describe symptoms, sensitivity, or prior treatment..."
+              placeholder="Describe symptoms or sensitivity..."
               rows={3}
-              className="w-full text-xs rounded-lg border border-slate-300 p-3 bg-white focus:outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 transition-colors resize-none"
+              className="w-full text-xs rounded-xl border border-slate-800 p-3 bg-slate-950/80 text-white focus:outline-none focus:border-white transition-colors resize-none placeholder:text-slate-500"
             />
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+          <div className="pt-2 flex items-center justify-end gap-2 border-t border-white/10">
             <button
               type="button"
               onClick={onClose}
-              className="h-9 px-3.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              className="h-10 px-4 text-xs font-semibold text-slate-400 hover:text-white rounded-xl transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="h-9 px-4 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors disabled:opacity-50"
+              className="h-10 px-5 text-xs font-bold text-slate-950 bg-white hover:bg-slate-200 rounded-xl transition-colors disabled:opacity-50"
             >
               {loading ? "Scheduling..." : "Confirm Booking"}
             </button>

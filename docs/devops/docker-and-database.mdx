@@ -1,0 +1,65 @@
+---
+title: "Docker & Database Operations"
+description: "Container orchestration, PostgreSQL schemas, indexing, and SQLite development fallback."
+section: "DevOps & Deployment"
+order: 1
+---
+
+# Docker & Database Operations
+
+DentalConnect is built for friction-free local execution and containerized cloud deployment.
+
+---
+
+## Docker Compose Stack
+
+The root `docker-compose.yml` configures five orchestrated services:
+
+```yaml
+services:
+  db:       # PostgreSQL 16 Alpine on port 5432
+  redis:    # Redis 7 Alpine on port 6379 (Cache & Task Queue)
+  minio:    # MinIO S3 Object Storage on port 9000 (API) & 9001 (Console)
+  backend:  # Python 3.12 FastAPI on port 8000
+  frontend: # Next.js 14 App Router on port 3000
+```
+
+### Starting the Ecosystem
+```bash
+docker compose up -d
+```
+
+### Inspecting Logs
+```bash
+docker compose logs -f backend
+docker compose logs -f db
+```
+
+---
+
+## Relational Database Architecture
+
+DentalConnect runs on PostgreSQL 16 with indexed foreign keys for sub-millisecond query performance:
+
+```
+users (id PK)
+ ├── dentist_profiles (user_id FK)
+ │    └── appointments (dentist_id FK)
+ └── patient_profiles (user_id FK)
+      ├── dental_charts (patient_id FK)
+      │    └── tooth_records (chart_id FK, tooth_number)
+      ├── appointments (patient_id FK)
+      ├── prescriptions (patient_id FK)
+      │    └── prescription_items (prescription_id FK)
+      ├── treatment_records (patient_id FK)
+      └── clinical_documents (patient_id FK)
+```
+
+---
+
+## Zero-Friction Local Testing (`sqlite3` Fallback)
+
+To eliminate the need for running Docker containers during fast offline frontend development or automated CI unit tests:
+- The database engine in `backend/app/core/db.py` inspects `POSTGRES_HOST` and `USE_SQLITE`.
+- If PostgreSQL is unreachable or `USE_SQLITE=true`, it automatically creates and queries a local `dentalconnect.db` file using Python's built-in `sqlite3` driver.
+- The standard `%s` query parameter syntax is converted on the fly to `?`, ensuring 100% code portability without altering business logic.

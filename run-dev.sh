@@ -17,10 +17,10 @@ if $DOCKER_CMD --version &> /dev/null; then
 fi
 
 # 2. Check and start FastAPI backend in background
-echo "Starting FastAPI backend on port 8000..."
+echo "Starting FastAPI backend on 0.0.0.0:8000..."
 cd /home/sneha/sneha/dentalconnect/backend
 source venv/bin/activate
-uvicorn app.main:app --port 8000 --reload &
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
 echo "Backend PID: $BACKEND_PID"
 

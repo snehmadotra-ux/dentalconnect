@@ -1,0 +1,55 @@
+---
+title: "Introduction to DentalConnect"
+description: "A specialized clinical dental practice and patient telehealth platform."
+section: "Getting Started"
+order: 1
+---
+
+# Welcome to DentalConnect
+
+**DentalConnect** is a specialized, open-source clinical practice and patient engagement platform designed specifically for dental operatories, group clinics, and solo practitioners.
+
+Unlike generic electronic health record (EHR) systems that treat dentistry like general medicine, DentalConnect is architected around the unique workflow of dental medicine: **tooth-by-tooth diagnosis, spatial surfaces (MODBL), procedure ledgers, and digital prescriptions.**
+
+---
+
+## The Vision
+
+Traditional dental practices face significant software fragmentation:
+- **Paper charts & clipboards** create data loss and slow down operatories.
+- **Legacy desktop EHRs** require expensive local servers, lack mobile access, and charge steep per-seat licenses.
+- **Patients** have zero visibility into their treatment plan, teeth conditions, or prescription history.
+
+DentalConnect bridges this gap by providing:
+1. A **real-time interactive 32-tooth odontogram** accessible on any tablet or browser.
+2. A **self-service patient portal** for online bookings, care plans, and digital prescriptions.
+3. A **clinical operatory dashboard** for dentists to manage patients, record ADA/CDT procedures, and review radiographs.
+4. An **administrative control panel** for practice analytics, doctor license verification, and team onboarding.
+
+---
+
+## Core Pillars
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    DENTALCONNECT PLATFORM                     │
+├─────────────────┬─────────────────┬──────────────────────────┤
+│ Clinical Engine │ Patient Portal  │ Practice Administration  │
+├─────────────────┼─────────────────┼──────────────────────────┤
+│ • 32-Tooth Chart│ • 24/7 Booking  │ • Board License Review   │
+│ • Surface MODBL │ • Digital Rx    │ • Doctor Invitations     │
+│ • ADA/CDT Ledger│ • Care Plans    │ • Practice Analytics     │
+│ • X-Ray Storage │ • Doctor Search │ • User Role Governance   │
+└─────────────────┴─────────────────┴──────────────────────────┘
+```
+
+- **Zero ORM Overhead**: Built on direct, audited SQL queries via Python's native `psycopg2` driver. No heavy ORM abstraction layers or unexpected connection pooling bugs.
+- **Type-Safe Full-Stack**: End-to-end typing from PostgreSQL schemas to Pydantic v2 validation models, and TypeScript interfaces in React/Next.js 14.
+- **Mobile-Ready REST API**: Decoupled architecture allowing future native iOS, Android, or tablet operatory apps to plug in seamlessly.
+
+---
+
+## Next Steps
+
+- Check out the [Quickstart Guide](/docs/getting-started/quickstart) to spin up the entire ecosystem in under 2 minutes.
+- Learn about the [System Architecture](/docs/getting-started/architecture) to understand data flows and container topology.

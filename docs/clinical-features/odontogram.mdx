@@ -1,0 +1,84 @@
+---
+title: "Interactive Odontogram (Dental Chart)"
+description: "Clinical documentation of the 32-tooth adult dentition chart, notation systems, and surfaces."
+section: "Clinical Features"
+order: 1
+---
+
+# Interactive Odontogram (Dental Chart)
+
+The **Odontogram** is the central clinical artifact in DentalConnect. It provides an interactive, visual 32-tooth adult dentition map enabling dentists to record diagnostic states, track previous restorations, and plan future procedures.
+
+---
+
+## Dual Numbering Notations
+
+Dentistry utilizes different numbering conventions globally. DentalConnect supports both standards with a live toggle:
+
+```
+Upper Jaw (Maxilla):
+Right Quadrant (1 - 8)   │   Left Quadrant (9 - 16)
+-------------------------┼-------------------------
+Right Quadrant (32 - 25) │   Left Quadrant (24 - 17)
+Lower Jaw (Mandible)
+```
+
+1. **Universal Numbering System (1–32)**: Standard across the United States. Number 1 represents the upper right third molar (wisdom tooth), progressing clockwise to 32 (lower right third molar).
+2. **FDI World Dental Federation Notation (11–48)**: Two-digit standard utilized across Europe, Canada, and internationally. The first digit denotes quadrant (1 to 4), and the second denotes tooth position from midline (1 to 8).
+
+### Notation Cross-Reference
+| Quadrant | Universal Numbers | FDI Numbers |
+|---|---|---|
+| **Maxillary Right (Q1)** | 1, 2, 3, 4, 5, 6, 7, 8 | 18, 17, 16, 15, 14, 13, 12, 11 |
+| **Maxillary Left (Q2)** | 9, 10, 11, 12, 13, 14, 15, 16 | 21, 22, 23, 24, 25, 26, 27, 28 |
+| **Mandibular Left (Q3)** | 17, 18, 19, 20, 21, 22, 23, 24 | 38, 37, 36, 35, 34, 33, 32, 31 |
+| **Mandibular Right (Q4)**| 25, 26, 27, 28, 29, 30, 31, 32 | 41, 42, 43, 44, 45, 46, 47, 48 |
+
+---
+
+## Anatomical Tooth Surfaces (MODBL)
+
+Every tooth crown contains 5 distinct spatial surfaces. When recording cavities (caries) or composite fillings, dentists can specify the exact surfaces involved:
+
+- **O — Occlusal**: The chewing / biting surface of premolars and molars.
+- **M — Mesial**: The surface facing forward toward the dental midline.
+- **D — Distal**: The surface facing backward away from the dental midline.
+- **B — Buccal / Facial**: The outer surface facing the cheek or lips.
+- **L — Lingual**: The inner surface facing the tongue.
+
+> **Example**: An `MOD` filling on Tooth #14 means the composite restoration spans the Mesial, Occlusal, and Distal surfaces.
+
+---
+
+## Clinical Status Codes & Colors
+
+Each tooth in the chart reflects its latest diagnostic condition via standardized clinical color codes:
+
+| Condition Code | Visual Appearance | Clinical Meaning |
+|---|---|---|
+| `HEALTHY` | ⚪ White fill with slate border | Intact tooth structure with no pathology. |
+| `CARIES` | 🔴 Rose fill (`#f43f5e`) | Active bacterial decay requiring restorative excavation. |
+| `FILLING` | 🔵 Blue fill (`#3b82f6`) | Existing composite resin or amalgam restoration. |
+| `CROWN` | 🟡 Amber fill (`#f59e0b`) | Full-coverage prosthetic crown (ceramic/zirconia/gold). |
+| `ROOT_CANAL` | 🟣 Purple root shading (`#8b5cf6`) | Endodontic therapy completed (pulpectomy and gutta-percha seal). |
+| `IMPLANT` | 🔷 Indigo fill (`#4f46e5`) | Osseointegrated titanium fixture replacing root. |
+| `MISSING` | ⬛ Crossed-out slate (`#94a3b8`) | Extracted or congenitally absent tooth. |
+| `EXTRACTION_NEEDED` | 🔴 Deep red border | Severe pathology, fracture, or unrestorable root. |
+
+---
+
+## Data Model & API
+
+Tooth records are stored in the `tooth_records` table linked to the patient's `dental_charts` entry:
+
+```http
+PATCH /api/v1/charts/patients/{patient_id}/teeth/{tooth_number}
+Content-Type: application/json
+Authorization: Bearer <dentist_token>
+
+{
+  "condition": "CARIES",
+  "surfaces": "MOD",
+  "notes": "Interproximal decay detected via bitewing radiograph."
+}
+```

@@ -1,0 +1,33 @@
+---
+title: "Compliance & Security"
+description: "HIPAA and GDPR alignment, encryption at rest, data sanitization, and password hashing."
+section: "Administration & Security"
+order: 4
+---
+
+# Compliance & Security Architecture
+
+Healthcare software demands stringent data protection controls. DentalConnect is engineered to align with Health Insurance Portability and Accountability Act (HIPAA) security rules and GDPR principles.
+
+---
+
+## Security Controls
+
+### 1. Encryption in Transit (TLS/HTTPS)
+- All client-to-API communication must be terminated over TLS 1.3 in production.
+- CORS policies in FastAPI are locked to explicit clinic frontend domain origins.
+
+### 2. Password Security
+- Passwords are never stored in plaintext.
+- Salted hashing is performed using **bcrypt** with standard computational work factor (cost 12), resistant to rainbow-table and GPU brute-force attacks.
+
+### 3. Patient Health Information (PHI) Isolation
+- Standard application logs (`stdout`) are sanitized: patient names, phone numbers, and diagnostic notes are omitted from log streams.
+- Direct database query parameters use SQL bind variables (`%s`), eliminating SQL injection attack vectors.
+
+### 4. Enterprise Single Sign-On (SSO) Ready
+- The `users` table includes a dedicated `zitadel_id` column.
+- Designed for plug-and-play integration with enterprise IAM solutions like Zitadel, Okta, or Keycloak for hospital/group-practice federated login.
+
+### 5. Access Auditability
+- The `treatment_records`, `tooth_records`, and `appointments` tables maintain strict `updated_at` and `performed_at` timestamps to ensure non-repudiation of clinical chart alterations.

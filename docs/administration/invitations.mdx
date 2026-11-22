@@ -1,0 +1,40 @@
+---
+title: "Staff & Practitioner Invitations"
+description: "Secure, tokenized onboarding invitations with 7-day TTL and pre-assigned roles."
+section: "Administration & Security"
+order: 3
+---
+
+# Practitioner & Staff Invitations
+
+Dental clinics frequently onboard associate dentists, dental hygienists, and reception staff. DentalConnect provides a tokenized invitation system to streamline this process securely.
+
+---
+
+## Invitation Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as Clinic Administrator
+    participant API as FastAPI Backend
+    participant DB as PostgreSQL 16
+    actor Doctor as Associate Dentist
+
+    Admin->>API: POST /api/v1/admin/invitations (email, role, specialization)
+    API->>API: Generates 32-byte cryptographic token (secrets.token_urlsafe)
+    API->>DB: INSERT INTO invitations (token, expires_at: 7 days)
+    API-->>Admin: Returns invite link (/invite?token=<token>)
+    Admin->>Doctor: Delivers invite URL via Email / Slack
+    Doctor->>API: Opens /invite?token=... & completes onboarding
+    API->>DB: Activates account & marks token as used_at
+```
+
+---
+
+## Invitation Token Specifications
+
+- **Cryptographic Entropy**: Generated using Python's `secrets.token_urlsafe(32)`.
+- **Expiration Window**: Valid for exactly 7 days (`now + timedelta(days=7)`).
+- **Single-Use Guard**: Once an invite is consumed, the `used_at` timestamp is written. Re-use attempts are rejected with `400 Bad Request`.
+- **Pre-Assigned Role**: The token pre-determines whether the recipient joins as `DENTIST` or `STAFF`, preventing privilege escalation.

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { ToothRecord, ToothCondition } from "@/types/dental";
 import { PatientToothModal } from "./PatientToothModal";
-import { Info, ShieldCheck, Sparkles } from "lucide-react";
 
 interface PatientOdontogramProps {
   teeth: ToothRecord[];
@@ -44,15 +43,15 @@ const TOOTH_NAMES: Record<number, string> = {
   32: "Lower Right 3rd Molar (Wisdom)",
 };
 
-const CONDITION_STYLES: Record<ToothCondition, { bg: string; border: string; label: string }> = {
-  HEALTHY: { bg: "bg-white", border: "border-slate-300", label: "Sound & Healthy" },
-  CARIES: { bg: "bg-rose-50", border: "border-rose-400", label: "Active Decay" },
-  FILLING: { bg: "bg-blue-50", border: "border-blue-400", label: "Filled / Restored" },
-  CROWN: { bg: "bg-amber-50", border: "border-amber-400", label: "Dental Crown" },
-  ROOT_CANAL: { bg: "bg-purple-50", border: "border-purple-400", label: "Root Canal" },
-  IMPLANT: { bg: "bg-indigo-50", border: "border-indigo-400", label: "Implant" },
-  MISSING: { bg: "bg-slate-100", border: "border-dashed border-slate-300", label: "Extracted" },
-  EXTRACTION_NEEDED: { bg: "bg-red-50", border: "border-red-500", label: "Evaluation Needed" },
+const CONDITION_STYLES: Record<ToothCondition, { bg: string; border: string; dot: string; label: string }> = {
+  HEALTHY: { bg: "bg-slate-950/80", border: "border-white/10", dot: "bg-emerald-400", label: "Sound" },
+  CARIES: { bg: "bg-rose-950/40", border: "border-rose-500/40", dot: "bg-rose-400", label: "Decay" },
+  FILLING: { bg: "bg-sky-950/40", border: "border-sky-500/40", dot: "bg-sky-400", label: "Restored" },
+  CROWN: { bg: "bg-amber-950/40", border: "border-amber-500/40", dot: "bg-amber-400", label: "Crown" },
+  ROOT_CANAL: { bg: "bg-purple-950/40", border: "border-purple-500/40", dot: "bg-purple-400", label: "Root Canal" },
+  IMPLANT: { bg: "bg-indigo-950/40", border: "border-indigo-500/40", dot: "bg-indigo-400", label: "Implant" },
+  MISSING: { bg: "bg-slate-950/30", border: "border-dashed border-slate-700", dot: "bg-slate-600", label: "Missing" },
+  EXTRACTION_NEEDED: { bg: "bg-red-950/40", border: "border-red-500/50", dot: "bg-red-400", label: "Eval Needed" },
 };
 
 export const PatientOdontogram: React.FC<PatientOdontogramProps> = ({ teeth }) => {
@@ -87,105 +86,78 @@ export const PatientOdontogram: React.FC<PatientOdontogramProps> = ({ teeth }) =
         type="button"
         onClick={() => handleToothClick(num)}
         title={`${TOOTH_NAMES[num]}: ${style.label}`}
-        className={`w-9 h-14 sm:w-11 sm:h-16 rounded-lg border ${style.border} ${style.bg} flex flex-col items-center justify-between p-1 shadow-2xs hover:border-slate-400 transition-colors cursor-pointer group`}
+        className={`w-9 h-14 sm:w-11 sm:h-16 rounded-xl border ${style.border} ${style.bg} flex flex-col items-center justify-between p-1.5 shadow-sm hover:border-cyan-400 transition-colors cursor-pointer group`}
       >
-        <span className="text-[10px] font-semibold text-slate-400 group-hover:text-slate-800">
+        <span className="text-[10px] font-mono text-slate-400 group-hover:text-white">
           #{num}
         </span>
-        <div
-          className={`w-3 h-3 rounded-full ${
-            cond === "HEALTHY"
-              ? "bg-emerald-500"
-              : cond === "CARIES"
-              ? "bg-rose-500"
-              : cond === "FILLING"
-              ? "bg-blue-500"
-              : cond === "CROWN"
-              ? "bg-amber-500"
-              : cond === "ROOT_CANAL"
-              ? "bg-purple-500"
-              : cond === "IMPLANT"
-              ? "bg-indigo-600"
-              : "bg-slate-300"
-          }`}
-        />
-        <span className="text-[9px] font-medium text-slate-500 truncate max-w-full">
-          {cond === "HEALTHY" ? "Sound" : cond.toLowerCase()}
+        <div className={`w-2.5 h-2.5 rounded-full ${style.dot}`} />
+        <span className="text-[9px] font-medium text-slate-400 truncate max-w-full">
+          {style.label}
         </span>
       </button>
     );
   };
 
   return (
-    <div className="bg-white rounded-xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">
-      {/* Header */}
+    <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl p-6 sm:p-8 border border-white/10 space-y-6 text-white">
+      {/* Header & Legend */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-semibold text-slate-900 tracking-tight">
-              32-Tooth Dental Health Chart
-            </h3>
-            <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-medium">
-              Patient Record
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Select any tooth to view condition status, notes, and oral hygiene guidance.
-          </p>
+          <h3 className="text-lg font-bold text-white tracking-tight">
+            32-Tooth Digital Odontogram
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">Universal Adult Dental Chart</p>
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap items-center gap-2.5 text-[11px] text-slate-600 bg-slate-50 p-2 rounded-lg border border-slate-200">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300 bg-slate-950/70 p-2.5 rounded-xl border border-white/5 font-mono">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
             <span>Sound</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
             <span>Decay</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-            <span>Filling</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-sky-400" />
+            <span>Restored</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
             <span>Crown</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+            <span className="w-2.5 h-2.5 rounded-full bg-purple-400" />
             <span>Root Canal</span>
           </div>
         </div>
       </div>
 
-      {/* 32-Tooth Anatomical Layout */}
-      <div className="space-y-6 py-4">
-        {/* Upper Arch (Maxilla): Teeth 1 to 16 */}
+      {/* 32-Tooth Layout */}
+      <div className="space-y-6 py-2">
+        {/* Upper Arch */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Upper Dental Arch (Maxillary)
-            </span>
-            <span className="text-[10px] text-slate-400">Right → Left</span>
+          <div className="flex items-center justify-between px-2 text-xs font-mono text-slate-400">
+            <span>Upper Arch (Maxillary)</span>
+            <span>#1 to #16</span>
           </div>
           <div className="overflow-x-auto pb-2">
-            <div className="flex items-center justify-center gap-1.5 min-w-[700px] p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="flex items-center justify-center gap-1.5 min-w-[700px] p-4 bg-slate-950/70 rounded-2xl border border-white/5">
               {Array.from({ length: 16 }, (_, i) => renderTooth(i + 1))}
             </div>
           </div>
         </div>
 
-        {/* Lower Arch (Mandible): Teeth 32 to 17 */}
+        {/* Lower Arch */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Lower Dental Arch (Mandibular)
-            </span>
-            <span className="text-[10px] text-slate-400">Right → Left</span>
+          <div className="flex items-center justify-between px-2 text-xs font-mono text-slate-400">
+            <span>Lower Arch (Mandibular)</span>
+            <span>#32 to #17</span>
           </div>
           <div className="overflow-x-auto pb-2">
-            <div className="flex items-center justify-center gap-1.5 min-w-[700px] p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="flex items-center justify-center gap-1.5 min-w-[700px] p-4 bg-slate-950/70 rounded-2xl border border-white/5">
               {Array.from({ length: 16 }, (_, i) => renderTooth(32 - i))}
             </div>
           </div>

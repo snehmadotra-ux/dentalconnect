@@ -17,12 +17,10 @@ import {
   AlertTriangle,
   Stethoscope,
   Loader2,
-  CheckCircle2,
   UserCheck,
 } from "lucide-react";
 
 export default function PatientPage() {
-  // Strict Route Guard: Only PATIENT allowed
   const { isAuthorized, user, isLoading } = useRoleGuard(["PATIENT"]);
 
   const [activeTab, setActiveTab] = useState<"CHART" | "DENTISTS" | "APPOINTMENTS" | "PRESCRIPTIONS">("CHART");
@@ -32,7 +30,6 @@ export default function PatientPage() {
   const [dentists, setDentists] = useState<Dentist[]>([]);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedDentistId, setSelectedDentistId] = useState<string | undefined>(undefined);
-  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
     if (!isAuthorized) return;
@@ -61,8 +58,6 @@ export default function PatientPage() {
         }
       } catch (err) {
         console.error("Failed to load patient records", err);
-      } finally {
-        setLoadingData(false);
       }
     };
 
@@ -96,9 +91,9 @@ export default function PatientPage() {
 
   if (isLoading || !isAuthorized) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-slate-500">
-        <Loader2 className="w-6 h-6 animate-spin text-slate-600 mb-3" />
-        <p className="text-xs font-medium">Verifying patient record access...</p>
+      <div className="min-h-screen bg-[#070a12] flex flex-col items-center justify-center p-6 text-slate-400">
+        <Loader2 className="w-6 h-6 animate-spin text-cyan-400 mb-3" />
+        <p className="text-xs font-mono">Verifying patient access...</p>
       </div>
     );
   }
@@ -108,34 +103,29 @@ export default function PatientPage() {
 
   const navTabs = [
     { id: "CHART", label: "Dental Chart", icon: <ShieldCheck className="w-4 h-4" /> },
-    { id: "DENTISTS", label: `Pick a Dentist (${dentists.length})`, icon: <Stethoscope className="w-4 h-4" /> },
+    { id: "DENTISTS", label: `Dentists (${dentists.length})`, icon: <Stethoscope className="w-4 h-4" /> },
     { id: "APPOINTMENTS", label: `Visits (${appointments.length})`, icon: <Calendar className="w-4 h-4" /> },
     { id: "PRESCRIPTIONS", label: `Prescriptions (${prescriptions.length})`, icon: <Pill className="w-4 h-4" /> },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#fafafa]">
+    <div className="min-h-screen flex flex-col bg-[#070a12] text-white">
       <AppNavbar activeTab={activeTab} onTabChange={setActiveTab} tabs={navTabs} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Context Header */}
-        <div className="bg-white rounded-xl border border-slate-200/80 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-white/10 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono text-slate-500 uppercase">Patient Portal</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span className="text-xs text-slate-600">{user?.full_name || "Patient Record"}</span>
-            </div>
-            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
+            <h1 className="text-2xl font-bold text-white tracking-tight">
               Dental Health Record
             </h1>
-            <p className="text-xs text-slate-500 max-w-xl">
-              Inspect your 32-tooth odontogram, view verified dentists in the network, and review consultations.
+            <p className="text-xs text-slate-400">
+              Patient: <span className="text-white font-medium">{user?.full_name || "Patient Record"}</span>
             </p>
 
             {user?.patient_profile?.medical_allergies && (
-              <div className="mt-3 inline-flex items-center gap-2 px-3 py-1 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-xs">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-rose-600" />
+              <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-rose-400" />
                 <span>Medical alert: {user.patient_profile.medical_allergies}</span>
               </div>
             )}
@@ -145,109 +135,97 @@ export default function PatientPage() {
             <button
               type="button"
               onClick={() => openBookingForDentist()}
-              className="h-9 px-4 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition-colors flex items-center gap-1.5 shadow-2xs"
+              className="h-10 px-5 rounded-xl bg-white hover:bg-slate-200 text-slate-950 font-bold text-xs transition-all duration-200 flex items-center gap-2 shadow-md active:scale-[0.99]"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Book Consultation</span>
+              <Plus className="w-4 h-4" />
+              <span>Book Visit</span>
             </button>
           </div>
         </div>
 
-        {/* Primary Health Metrics (Unslop: Tabular, Numbers-first, No decoration) */}
+        {/* Tabular Health Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80">
-            <p className="text-xs text-slate-500 font-medium">Sound Teeth</p>
-            <p className="text-2xl font-semibold text-slate-900 mt-1 tabular-nums">
-              {healthyCount || 24} <span className="text-xs font-normal text-slate-400">/ 32</span>
+          <div className="bg-slate-900/80 backdrop-blur-xl p-5 rounded-2xl border border-white/10">
+            <p className="text-xs text-slate-400 font-medium">Sound Teeth</p>
+            <p className="text-2xl font-bold text-white mt-1 tabular-nums">
+              {healthyCount || 24} <span className="text-xs font-normal text-slate-500">/ 32</span>
             </p>
-            <p className="text-[11px] text-emerald-700 mt-1">Healthy enamel intact</p>
+            <p className="text-[11px] text-emerald-400 mt-1">Healthy enamel intact</p>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80">
-            <p className="text-xs text-slate-500 font-medium">Active Decay</p>
-            <p className="text-2xl font-semibold text-slate-900 mt-1 tabular-nums">
-              {cariesCount} <span className="text-xs font-normal text-slate-400">teeth</span>
+          <div className="bg-slate-900/80 backdrop-blur-xl p-5 rounded-2xl border border-white/10">
+            <p className="text-xs text-slate-400 font-medium">Active Decay</p>
+            <p className="text-2xl font-bold text-white mt-1 tabular-nums">
+              {cariesCount} <span className="text-xs font-normal text-slate-500">teeth</span>
             </p>
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-[11px] text-slate-400 mt-1">
               {cariesCount > 0 ? "Treatment recommended" : "None detected"}
             </p>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80">
-            <p className="text-xs text-slate-500 font-medium">Upcoming Visits</p>
-            <p className="text-2xl font-semibold text-slate-900 mt-1 tabular-nums">
+          <div className="bg-slate-900/80 backdrop-blur-xl p-5 rounded-2xl border border-white/10">
+            <p className="text-xs text-slate-400 font-medium">Upcoming Visits</p>
+            <p className="text-2xl font-bold text-white mt-1 tabular-nums">
               {appointments.length}
             </p>
-            <p className="text-[11px] text-slate-500 mt-1">Clinical consultations</p>
+            <p className="text-[11px] text-slate-400 mt-1">Clinical consultations</p>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80">
-            <p className="text-xs text-slate-500 font-medium">Prescriptions</p>
-            <p className="text-2xl font-semibold text-slate-900 mt-1 tabular-nums">
+          <div className="bg-slate-900/80 backdrop-blur-xl p-5 rounded-2xl border border-white/10">
+            <p className="text-xs text-slate-400 font-medium">Prescriptions</p>
+            <p className="text-2xl font-bold text-white mt-1 tabular-nums">
               {prescriptions.length}
             </p>
-            <p className="text-[11px] text-slate-500 mt-1">Digital Rx issued</p>
+            <p className="text-[11px] text-slate-400 mt-1">Active digital orders</p>
           </div>
         </div>
 
-        {/* TAB 1: Patient-Friendly 32-Tooth Odontogram */}
+        {/* TAB 1: 32-Tooth Odontogram */}
         {activeTab === "CHART" && (
           <div className="space-y-6">
             <PatientOdontogram teeth={teeth} />
           </div>
         )}
 
-        {/* TAB 2: Pick Your Dentist (Uber Model Marketplace Directory) */}
+        {/* TAB 2: Dentists Directory */}
         {activeTab === "DENTISTS" && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-semibold text-slate-900">Verified Dental Practitioners</h2>
-                <p className="text-xs text-slate-500">
-                  Select a licensed practitioner to schedule your next oral examination or restorative care.
-                </p>
-              </div>
-            </div>
-
             {dentists.length === 0 ? (
-              <div className="bg-white p-12 rounded-xl text-center border border-slate-200/80 space-y-2">
-                <Stethoscope className="w-8 h-8 text-slate-300 mx-auto" />
-                <h3 className="text-sm font-semibold text-slate-700">No practitioners available</h3>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  There are currently no active verified dentists listed in your area.
-                </p>
+              <div className="bg-slate-900/80 backdrop-blur-xl p-12 rounded-2xl text-center border border-white/10 space-y-2">
+                <Stethoscope className="w-8 h-8 text-slate-500 mx-auto" />
+                <h3 className="text-sm font-semibold text-white">No clinicians available</h3>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {dentists.map((doc) => (
                   <div
                     key={doc.id}
-                    className="bg-white rounded-xl border border-slate-200/80 p-5 flex flex-col justify-between space-y-4"
+                    className="bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-white/10 p-5 flex flex-col justify-between space-y-4 hover:border-cyan-500/30 transition-all duration-200"
                   >
                     <div className="space-y-3">
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <h3 className="font-semibold text-slate-900 text-sm">{doc.name}</h3>
+                            <h3 className="font-bold text-white text-sm">{doc.name}</h3>
                             <span title="Board Verified">
-                              <UserCheck className="w-3.5 h-3.5 text-sky-600" />
+                              <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
                             </span>
                           </div>
-                          <p className="text-xs text-slate-500">{doc.specialization || "General Dentistry"}</p>
+                          <p className="text-xs text-slate-400">{doc.specialization || "General Dentistry"}</p>
                         </div>
-                        <span className="text-[11px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                        <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 px-2 py-0.5 rounded-lg">
                           ${doc.consultation_fee || 90}
                         </span>
                       </div>
 
-                      <div className="space-y-1 text-xs text-slate-600">
-                        <div className="flex items-center gap-2 text-[11px] text-slate-500">
-                          <span className="font-mono">License #{doc.license_number || "Verified"}</span>
+                      <div className="space-y-1 text-xs text-slate-400">
+                        <div className="flex items-center gap-2 text-[11px] text-slate-500 font-mono">
+                          <span>License #{doc.license_number || "Verified"}</span>
                           <span>•</span>
                           <span>{doc.years_of_experience || "8+ years"} exp</span>
                         </div>
                         {doc.bio && (
-                          <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed pt-1">
+                          <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed pt-1">
                             {doc.bio}
                           </p>
                         )}
@@ -257,10 +235,10 @@ export default function PatientPage() {
                     <button
                       type="button"
                       onClick={() => openBookingForDentist(doc.id)}
-                      className="w-full h-9 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition-colors flex items-center justify-center gap-1.5"
+                      className="w-full h-10 rounded-xl bg-white hover:bg-slate-200 text-slate-950 font-bold text-xs transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
                     >
                       <Calendar className="w-3.5 h-3.5" />
-                      <span>Book with {doc.name.split(" ")[1] || "Doctor"}</span>
+                      <span>Book Consultation</span>
                     </button>
                   </div>
                 ))}
@@ -273,63 +251,57 @@ export default function PatientPage() {
         {activeTab === "APPOINTMENTS" && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-semibold text-slate-900">Your Consultations</h2>
-                <p className="text-xs text-slate-500">Upcoming and completed dental appointments</p>
-              </div>
+              <h2 className="text-lg font-bold text-white">Consultations</h2>
               <button
                 type="button"
                 onClick={() => openBookingForDentist()}
-                className="h-8 px-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5"
+                className="h-9 px-4 bg-white hover:bg-slate-200 text-slate-950 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 shadow-sm"
               >
-                <Plus className="w-3 h-3" />
-                <span>New Booking</span>
+                <Plus className="w-3.5 h-3.5" />
+                <span>New Visit</span>
               </button>
             </div>
 
             {appointments.length === 0 ? (
-              <div className="bg-white p-12 rounded-xl text-center border border-slate-200/80 space-y-2">
-                <Calendar className="w-8 h-8 text-slate-300 mx-auto" />
-                <h3 className="text-sm font-semibold text-slate-700">No scheduled appointments</h3>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  You do not currently have any upcoming clinical consultations booked.
-                </p>
+              <div className="bg-slate-900/80 backdrop-blur-xl p-12 rounded-2xl text-center border border-white/10 space-y-2">
+                <Calendar className="w-8 h-8 text-slate-500 mx-auto" />
+                <h3 className="text-sm font-semibold text-white">No scheduled appointments</h3>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {appointments.map((a) => (
                   <div
                     key={a.id}
-                    className="bg-white p-5 rounded-xl border border-slate-200/80 space-y-3"
+                    className="bg-slate-900/80 backdrop-blur-xl p-5 rounded-2xl border border-white/10 space-y-3"
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <span className="text-[10px] font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                        <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 px-2 py-0.5 rounded-lg">
                           {a.status}
                         </span>
-                        <h3 className="text-sm font-semibold text-slate-900 mt-2">{a.reason}</h3>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Doctor: <span className="font-medium text-slate-700">{a.dentist_name || "Dentist"}</span>
+                        <h3 className="text-sm font-bold text-white mt-2">{a.reason}</h3>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Doctor: <span className="font-medium text-slate-200">{a.dentist_name || "Dentist"}</span>
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                    <div className="flex items-center gap-4 text-xs text-slate-300 bg-slate-950/70 p-3 rounded-xl border border-white/5 font-mono">
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                        <span className="tabular-nums">{new Date(a.start_time).toLocaleDateString()}</span>
+                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{new Date(a.start_time).toLocaleDateString()}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5 text-slate-500" />
-                        <span className="tabular-nums">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
+                        <span>
                           {new Date(a.start_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </span>
                       </div>
                     </div>
 
                     {a.clinical_notes && (
-                      <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                        <span className="font-medium text-slate-700">Doctor Note:</span> {a.clinical_notes}
+                      <p className="text-xs text-slate-300 bg-slate-950/70 p-3 rounded-xl border border-white/5">
+                        <span className="text-slate-400">Doctor Note:</span> {a.clinical_notes}
                       </p>
                     )}
                   </div>
@@ -342,18 +314,12 @@ export default function PatientPage() {
         {/* TAB 4: Prescriptions */}
         {activeTab === "PRESCRIPTIONS" && (
           <div className="space-y-4">
-            <div>
-              <h2 className="text-base font-semibold text-slate-900">Your Prescriptions</h2>
-              <p className="text-xs text-slate-500">Medications prescribed during clinical consultations</p>
-            </div>
+            <h2 className="text-lg font-bold text-white">Prescriptions</h2>
 
             {prescriptions.length === 0 ? (
-              <div className="bg-white p-12 rounded-xl text-center border border-slate-200/80 space-y-2">
-                <Pill className="w-8 h-8 text-slate-300 mx-auto" />
-                <h3 className="text-sm font-semibold text-slate-700">No active prescriptions</h3>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  When your dentist prescribes dental pain management or antibiotics, they will appear here.
-                </p>
+              <div className="bg-slate-900/80 backdrop-blur-xl p-12 rounded-2xl text-center border border-white/10 space-y-2">
+                <Pill className="w-8 h-8 text-slate-500 mx-auto" />
+                <h3 className="text-sm font-semibold text-white">No active prescriptions</h3>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -376,6 +342,11 @@ export default function PatientPage() {
         initialDentistId={selectedDentistId}
         onBook={handleBookAppointment}
       />
+
+      {/* Footer */}
+      <footer className="relative z-10 h-16 max-w-7xl w-full mx-auto px-6 sm:px-10 flex items-center justify-center text-xs text-slate-500 border-t border-white/5">
+        <p>© Dental Connect</p>
+      </footer>
     </div>
   );
 }

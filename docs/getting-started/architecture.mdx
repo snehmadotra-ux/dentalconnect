@@ -1,0 +1,58 @@
+---
+title: "System Architecture"
+description: "In-depth overview of the DentalConnect topology, data layers, and design decisions."
+section: "Getting Started"
+order: 3
+---
+
+# System Architecture
+
+DentalConnect is built with a decoupled monorepo architecture prioritizing performance, transparent query execution, and role-based isolation.
+
+---
+
+## High-Level Topology
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                       CLIENT LAYER                          │
+│               Next.js 14 App Router + React 18              │
+│       Role-Guarded Portals: /doctor · /patient · /admin     │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ HTTPS (REST + JSON)
+┌──────────────────────────────▼──────────────────────────────┐
+│                        API LAYER                            │
+│                 Python 3.12 + FastAPI                       │
+│    • Direct SQL via psycopg2 (RealDictCursor)               │
+│    • Stateless JWT Authentication (HS256)                   │
+│    • Pydantic v2 Request & Response Validation              │
+│    • Role-Based Access Control (RBAC) Dependencies          │
+└──────────────┬───────────────┬────────────────┬─────────────┘
+               │ psycopg2      │ redis-py       │ boto3
+┌──────────────▼───┐  ┌────────▼────────┐  ┌────▼─────────────┐
+│  PostgreSQL 16   │  │    Redis 7      │  │    MinIO (S3)    │
+│  Clinical Tables │  │  Cache & Queue  │  │ X-Rays & Imaging │
+└──────────────────┘  └─────────────────┘  └──────────────────┘
+```
+
+---
+
+## Architectural Principles
+
+### 1. Direct SQL via `psycopg2` (No Heavy ORM)
+Instead of abstracting queries through complex ORMs like SQLAlchemy or Tortoise, DentalConnect queries PostgreSQL using the battle-tested `psycopg2` driver:
+- **Deterministic Query Performance**: Every SQL query (`SELECT`, `INSERT`, `UPDATE`) is written explicitly in code. No hidden `N+1` query cascades.
+- **Dictionary Cursors**: Queries use `psycopg2.extras.RealDictCursor` so returned rows serialize directly to JSON.
+- **SQL Injection Prevention**: All queries use parameterized inputs (`%s`), never string concatenation.
+- **Zero-Friction Local Testing**: The database connector (`app/core/db.py`) automatically falls back to Python's standard `sqlite3` driver if `USE_SQLITE=true` or when PostgreSQL is offline during unit testing.
+
+### 2. Role-Based Access Control (RBAC)
+Access control is enforced at both boundaries:
+- **Server-Side (`FastAPI`)**: Handled via dependency injection (`get_current_user`, `get_current_dentist`, `get_current_admin` in `app/api/deps.py`). Unauthorized requests immediately return `401 Unauthorized` or `403 Forbidden`.
+- **Client-Side (`Next.js`)**: Protected by `useRoleGuard(["DENTIST"])` in `src/hooks/useRoleGuard.ts`. If an unauthorized session is detected, the user is redirected to their authorized portal.
+
+### 3. S3-Compatible Medical Imaging (MinIO)
+Medical radiographs (panoramic, periapical, bitewing) and PDF lab slips are never stored inside PostgreSQL as binary blobs (`BLOB`/`BYTEA`).
+- Files are streamed to MinIO (or AWS S3 in production).
+- PostgreSQL only stores metadata, category tags, and the unique `s3_key` in the `clinical_documents` table.
+- Files are viewed securely using expiring presigned URLs.

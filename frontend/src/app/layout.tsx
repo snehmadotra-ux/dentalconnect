@@ -3,7 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "DentalConnect | Modern Dental Clinic & Patient Telehealth Platform",
+  title: "Dental Connect | Modern Dental Clinic & Patient Telehealth Platform",
   description: "Connect dentists and patients with interactive 32-tooth odontogram charts, appointment scheduling, and digital prescriptions.",
 };
 

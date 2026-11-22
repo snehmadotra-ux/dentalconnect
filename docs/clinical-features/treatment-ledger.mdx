@@ -1,0 +1,43 @@
+---
+title: "Treatment Procedure Ledger"
+description: "ADA/CDT procedure tracking, clinical notes, and financial accounting per tooth."
+section: "Clinical Features"
+order: 4
+---
+
+# Treatment Procedure Ledger
+
+DentalConnect includes a comprehensive clinical procedure ledger (`treatment_records`) that tracks every intervention performed in the clinic by American Dental Association (ADA) CDT procedure code, tooth number, and fee.
+
+---
+
+## Standard Dental Procedure Codes (CDT)
+
+DentalConnect supports standard CDT procedure classification:
+
+| Category | CDT Code | Description | Standard Fee |
+|---|---|---|---|
+| **Diagnostic** | `D0120` | Periodic oral evaluation (established patient) | $65.00 |
+| **Diagnostic** | `D0210` | Full-mouth intraoral complete series (FMX) | $140.00 |
+| **Diagnostic** | `D0274` | Bitewings — four radiographic images | $75.00 |
+| **Preventive** | `D1110` | Prophylaxis — adult dental cleaning | $95.00 |
+| **Restorative** | `D2391` | Resin-based composite — one surface, posterior | $185.00 |
+| **Restorative** | `D2393` | Resin-based composite — three surfaces (MOD), posterior | $280.00 |
+| **Prosthodontics**| `D2740` | Crown — porcelain / ceramic substrate | $1,150.00 |
+| **Endodontics** | `D3330` | Endodontic therapy — molar (excluding final restoration)| $1,050.00 |
+| **Periodontics** | `D4341` | Periodontal scaling & root planing — per quadrant | $260.00 |
+| **Oral Surgery** | `D7140` | Extraction, erupted tooth or exposed root | $195.00 |
+
+---
+
+## Procedure Record Schema
+
+Each entry in the ledger captures:
+- `patient_id`: Reference to patient.
+- `dentist_id`: The treating practitioner.
+- `appointment_id`: Optional link to the visit during which the procedure took place.
+- `tooth_number`: Specific tooth (1–32) for localized procedures.
+- `procedure_code`: Standard CDT code (e.g. `D2393`).
+- `fee`: Itemized charge for billing.
+- `status`: `COMPLETED`, `PLANNED`, or `IN_PROGRESS`.
+- `performed_at`: Timestamp for the audit log.

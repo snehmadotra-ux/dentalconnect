@@ -1,6 +1,8 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.core.config import settings
 from app.core.db import init_tables
@@ -22,13 +24,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
+# 1. Reverse Proxy / Forwarded Headers Middleware (for cloud deployments behind ALB, Nginx, Render, Railway)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+
+# 2. CORS Middleware: explicit origins + regex for all Vercel deployments (*.vercel.app)
+cors_origins = list(settings.BACKEND_CORS_ORIGINS)
+if settings.FRONTEND_URL and settings.FRONTEND_URL not in cors_origins:
+    cors_origins.append(settings.FRONTEND_URL)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)

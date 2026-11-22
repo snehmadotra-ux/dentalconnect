@@ -1,0 +1,54 @@
+---
+title: "API Reference Overview"
+description: "Authentication, standard headers, status codes, and error envelopes."
+section: "API Reference"
+order: 1
+---
+
+# API Reference Overview
+
+The DentalConnect REST API is built on FastAPI and follows RESTful conventions. It uses standard HTTP verbs (`GET`, `POST`, `PATCH`, `DELETE`) and returns JSON payloads.
+
+---
+
+## Base URLs
+
+- **Local Development**: `http://localhost:8000/api/v1`
+- **Docker Compose**: `http://localhost:8000/api/v1`
+- **Interactive Swagger Explorer**: `http://localhost:8000/docs`
+- **Alternative Redoc Documentation**: `http://localhost:8000/redoc`
+
+---
+
+## Authentication Header
+
+All protected endpoints require an HTTP `Authorization` header containing a valid Bearer JWT token:
+
+```http
+Authorization: Bearer <your_access_token>
+```
+
+Tokens are obtained via the `POST /api/v1/auth/login` endpoint.
+
+---
+
+## Standard Error Response Envelope
+
+When an error occurs, the API returns a structured JSON payload with an appropriate HTTP status code:
+
+```json
+{
+  "detail": "Only licensed dentists can update tooth records"
+}
+```
+
+### Common HTTP Status Codes
+| Code | Meaning | Cause |
+|---|---|---|
+| `200 OK` | Success | Request succeeded. |
+| `201 Created` | Created | Resource successfully created. |
+| `400 Bad Request` | Validation Error | Missing parameters, invalid email, or invalid tooth number. |
+| `401 Unauthorized` | Auth Error | Missing or expired JWT Bearer token. |
+| `403 Forbidden` | RBAC Guard | User role lacks permission for this endpoint. |
+| `404 Not Found` | Missing Resource | Patient, tooth record, or appointment does not exist. |
+| `500 Server Error` | Internal Error | Database connection failure or unhandled exception. |

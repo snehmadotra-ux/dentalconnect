@@ -1,116 +1,215 @@
-# DentalConnect 🦷
+# Dental Connect
 
-> **A modern, specialized clinical platform connecting dentists with their patients.** Features an interactive 32-tooth odontogram (dental chart), appointment scheduling, digital prescriptions, and an open REST API ready for mobile applications.
+> Precision oral healthcare platform connecting patients and dental clinicians through real-time chairside charting, transparent scheduling, and digital prescriptions.
 
----
-
-## 🌟 Key Features
-
-* **Interactive Odontogram (Dental Chart)**:
-  * Visual 32-tooth adult dentition map with **Universal (1–32)** and **FDI (11–48)** notation toggle.
-  * Clickable tooth anatomy: crown, surfaces (Occlusal, Mesial, Distal, Buccal, Lingual), and roots.
-  * Color-coded clinical diagnoses: Healthy, Caries (Decay), Restored (Filling), Crown, Root Canal, Implant, and Missing.
-* **Patient Portal**:
-  * Seamless online appointment booking with dentist selection and symptoms.
-  * Digital prescriptions (medications, dosage, frequency, and instructions).
-  * Treatment history and tooth status tracking.
-* **Dentist Clinical Dashboard**:
-  * Inspect patient odontograms tooth-by-tooth.
-  * Update diagnostic records, record caries, and log treatment notes.
-  * Issue digital prescriptions.
-* **Full-Stack Architecture**:
-  * **Backend**: Python 3.12 + FastAPI + SQLAlchemy 2.0 (Async) + Alembic.
-  * **Frontend**: Next.js 14+ (App Router) + TypeScript + Tailwind CSS + Lucide Icons.
-  * **Database & Infrastructure**: PostgreSQL 16, Redis 7, MinIO (S3 object storage for X-Rays) in Docker.
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/frontend-Next.js%2014-black.svg)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/backend-FastAPI%200.110-009688.svg)](https://fastapi.tiangolo.com/)
+[![PostgreSQL](https://img.shields.io/badge/database-PostgreSQL%2016-336791.svg)](https://www.postgresql.org/)
 
 ---
 
-## 🚀 Quick Start with Docker (Recommended)
+## Product Overview
 
-Run the entire ecosystem (Database, Redis, MinIO, FastAPI Backend, and Next.js Frontend) in one command:
+Dental Connect is built around a single design philosophy: zero fluff, total utility. Healthcare software often suffers from visual clutter, confusing marketing text, and dense interfaces. Dental Connect strips away all decorative filler to deliver an intentional, distraction-free environment for both patients and clinicians.
+
+![Dental Connect Landing Page](docs/images/landing.png)
+
+---
+
+## Design System
+
+The platform is designed around the **60-30-10** color rule and single-viewport spatial discipline:
+
+* **60% Obsidian Canvas (`#070a12`)**: A distraction-free deep dark backdrop that reduces visual fatigue during clinical operatory work and keeps attention focused on clinical data.
+* **30% Pure White Structure (`#ffffff`)**: High-contrast typography, primary card surfaces, and primary action buttons.
+* **10% Electric Cyan Pop (`#00f0ff` / `text-cyan-400`)**: Reserved strictly for focal words, active states, and clinical highlights.
+* **Zero Fluff**: No decorative filler text, no marketing badges, and no public exposure of confidential clinical data prior to authentication.
+
+---
+
+## Core Capabilities
+
+### 1. Interactive 32-Tooth Digital Odontogram
+
+Patients and clinicians inspect an anatomical representation of the adult dentition mapped in standard Universal notation (Teeth #1 to #32).
+
+![Patient Portal & Odontogram](docs/images/patient-portal.png)
+
+* **Upper Arch (Maxillary)**: Teeth #1 to #16 mapped right-to-left.
+* **Lower Arch (Mandibular)**: Teeth #32 to #17 mapped right-to-left.
+* **Color-Coded Diagnostic States**:
+  * **Sound (Emerald)**: Intact natural enamel.
+  * **Decay (Rose)**: Active surface caries requiring restorative care.
+  * **Restored (Sky Blue)**: Composite or amalgam restoration.
+  * **Crown (Amber)**: Full-coverage ceramic or porcelain crown.
+  * **Root Canal (Purple)**: Endodontic therapy completed.
+  * **Implant (Indigo)**: Integrated titanium dental implant.
+* **Interactive Tooth Inspection**: Selecting any tooth reveals condition summaries, clinical notes, and hygiene advice.
+
+![Interactive Tooth Details](docs/images/tooth-modal.png)
+
+---
+
+### 2. Streamlined Authentication
+
+Authentication is unified into focused, single-purpose cards with no marketing sidebars or distracting text.
+
+| Sign In (`/login`) | Sign Up (`/register`) |
+| :---: | :---: |
+| ![Sign In](docs/images/login.png) | ![Sign Up](docs/images/register.png) |
+| Direct email and password credentials with automatic role dispatch to patient, doctor, or admin portals. | Fast segmented role toggle between Patient and Dental Practitioner with board review workflows. |
+
+---
+
+### 3. Direct Visit Scheduling
+
+* **Clinician Directory**: Patients browse verified practitioners with transparent consultation fees and state board credentials.
+* **Real-Time Booking**: Select clinical reasons, appointment slots, and symptoms directly into the practitioner's operatory queue.
+
+---
+
+### 4. Digital Prescription Pad
+
+* Encrypted electronic prescriptions issued chairside by practitioners.
+* Itemized medication ledgers with dosage, frequency, course duration, and administration guidance.
+* Immediate patient record availability without paper slips.
+
+---
+
+## Architecture & Tech Stack
+
+```
++-------------------------------------------------------------+
+|                     Next.js 14 Frontend                     |
+|         (App Router, TypeScript, Tailwind CSS, Lucide)      |
++------------------------------+------------------------------+
+                               | REST API (JSON / JWT)
+                               v
++-------------------------------------------------------------+
+|                     FastAPI Backend                         |
+|         (Python 3.12, Pydantic v2, SQLAlchemy 2.0)          |
++------------------------------+------------------------------+
+                               |
+            +------------------+------------------+
+            |                                     |
+            v                                     v
++-----------------------+             +-----------------------+
+|  PostgreSQL 16 Engine |             | MinIO S3 File Storage |
+| (SQLite dev fallback) |             | (X-Rays & Documents)  |
++-----------------------+             +-----------------------+
+```
+
+* **Frontend**: Next.js 14 with App Router, React 18, TypeScript, Tailwind CSS, and Lucide icons.
+* **Backend**: FastAPI with Python 3.12, Pydantic v2 schemas, and asynchronous SQLAlchemy 2.0.
+* **Database**: PostgreSQL 16 (production) with automatic local SQLite fallback (`backend/dentalconnect.db`) for instant zero-dependency development.
+* **Object Storage**: MinIO for S3-compatible dental radiograph storage.
+* **Authentication**: JWT access tokens with role-based route guards (`PATIENT`, `DENTIST`, `ADMIN`).
+
+---
+
+## Quick Start
+
+### Option A: Complete Docker Compose Stack
+
+Run the entire ecosystem with one command:
 
 ```bash
 docker compose up -d
 ```
 
-Once started:
-* **Frontend Web App**: [http://localhost:3000](http://localhost:3000)
-* **FastAPI Swagger API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
-* **MinIO Object Storage Console**: [http://localhost:9001](http://localhost:9001) (User: `minio_admin`, Password: `minio_secret_key`)
-
-To seed sample clinical data:
-```bash
-docker compose exec backend python app/seed.py
-```
+Service endpoints:
+* **Frontend Web Application**: [http://localhost:3000](http://localhost:3000)
+* **FastAPI Swagger Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
+* **MinIO Console**: [http://localhost:9001](http://localhost:9001) (User: `minio_admin`, Password: `minio_secret_key`)
 
 ---
 
-## 💻 Native Local Development (Without Docker for App)
+### Option B: Native Local Development
 
-You can also run PostgreSQL, Redis, and MinIO in Docker while running the Backend and Frontend on your machine with live hot-reloading:
+Run the backend and frontend locally with hot-reloading:
 
-### 1. Start Database & Infrastructure
-```bash
-docker compose up -d db redis minio
-```
+#### 1. Backend Setup (FastAPI)
 
-### 2. Run Backend (FastAPI)
 ```bash
 cd backend
+python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-python app/seed.py      # Seed demo dentist, patient & dental chart
-uvicorn app.main:app --reload --port 8000
+
+# Initialize database schema and seed clinical demo accounts
+python app/seed.py
+
+# Start the API server
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 3. Run Frontend (Next.js)
+The backend automatically utilizes the local SQLite database fallback when Docker PostgreSQL is offline.
+
+#### 2. Frontend Setup (Next.js)
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 🧪 Demo Credentials
+## Demo Accounts
 
-* **Dentist Account**:
-  * Email: `dr.vance@dentalconnect.com`
-  * Password: `Password123!`
-* **Patient Account**:
-  * Email: `alex@example.com`
-  * Password: `Password123!`
+Pre-seeded clinical accounts ready for instant testing:
+
+| Role | Email | Password | Access Route |
+| :--- | :--- | :--- | :--- |
+| **Patient** | `alex@example.com` | `Password123!` | `/patient` |
+| **Dentist** | `dr.vance@dentalconnect.com` | `Password123!` | `/doctor` |
+| **Admin** | `admin@dentalconnect.com` | `AdminSecure123!` | `/admin` |
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 dentalconnect/
-├── docker-compose.yml       # PostgreSQL 16, Redis, MinIO, Backend & Frontend
-├── .env.example             # Configuration template
-├── setup-prereqs.sh         # System prerequisites installer
+├── docs/
+│   └── images/              # High-resolution application screenshots
+│       ├── landing.png
+│       ├── login.png
+│       ├── register.png
+│       ├── patient-portal.png
+│       └── tooth-modal.png
+│
+├── frontend/                # Next.js 14 client application
+│   ├── src/app/
+│   │   ├── page.tsx         # Minimal hero landing page
+│   │   ├── (auth)/
+│   │   │   ├── login/       # Sign in page
+│   │   │   └── register/    # Sign up page
+│   │   ├── patient/         # Patient health record & odontogram
+│   │   ├── doctor/          # Clinician operatory workspace
+│   │   └── admin/           # Administrative governance console
+│   └── src/components/
+│       ├── layout/          # Global AppNavbar
+│       ├── patient/         # Patient odontogram & tooth modal
+│       └── appointments/    # Appointment booking modal
 │
 ├── backend/                 # FastAPI REST API
 │   ├── app/
-│   │   ├── api/v1/          # Endpoints (auth, dentists, patients, appointments, charts, prescriptions)
-│   │   ├── core/            # Config, security, database session
-│   │   ├── models/          # SQLAlchemy ORM models (ToothRecord, DentalChart, User, Appointment)
+│   │   ├── api/v1/          # Endpoints (auth, dentists, patients, charts, rx)
+│   │   ├── core/            # Database session, config, security
+│   │   ├── models/          # SQLAlchemy ORM models
 │   │   ├── schemas/         # Pydantic v2 validation models
-│   │   ├── main.py          # FastAPI application entrypoint
-│   │   └── seed.py          # Demo database seeder
-│   ├── alembic/             # Database migrations
+│   │   └── seed.py          # Clinical sample database seeder
 │   └── requirements.txt
 │
-└── frontend/                # Next.js 14+ App Router
-    ├── src/
-    │   ├── app/             # App pages & layouts
-    │   ├── components/
-    │   │   ├── odontogram/  # 32-Tooth interactive Dental Chart & ToothModal
-    │   │   ├── appointments/# Booking modals
-    │   │   └── prescriptions/# Digital Rx cards
-    │   ├── lib/             # API client
-    │   └── types/           # TypeScript definitions
-    └── package.json
+└── docker-compose.yml       # Production services orchestration
 ```
+
+---
+
+## License
+
+This project is licensed under the MIT License.

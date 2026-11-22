@@ -33,40 +33,40 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
   const roleLabel = role === "DENTIST" ? "Doctor" : role === "PATIENT" ? "Patient" : role === "ADMIN" ? "Admin" : "";
 
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-200/80">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-[#070a12]/90 backdrop-blur-xl border-b border-white/10 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand */}
         <div
           onClick={() => router.push(getHomeRoute())}
-          className="flex items-center gap-2.5 cursor-pointer"
+          className="flex items-center gap-3 cursor-pointer group"
         >
-          <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white">
-            <HeartPulse className="w-4 h-4 text-sky-400" />
+          <div className="w-8 h-8 rounded-xl bg-white text-slate-950 flex items-center justify-center font-bold shadow-md transition-transform duration-200 group-hover:scale-105">
+            <HeartPulse className="w-4 h-4 text-cyan-500" />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-slate-900 tracking-tight">
-              DentalConnect
+            <span className="text-base font-bold text-white tracking-tight">
+              Dental Connect
             </span>
             {role && (
-              <span className="text-[10px] font-mono text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 px-2 py-0.5 rounded-lg">
                 {roleLabel}
               </span>
             )}
           </div>
         </div>
 
-        {/* Quiet Context Navigation */}
+        {/* Minimal Context Navigation */}
         {tabs && onTabChange && (
-          <nav className="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200/60">
+          <nav className="hidden md:flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-white/10">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
-                className={`h-7 px-3 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                className={`h-8 px-3.5 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                   activeTab === tab.id
-                    ? "bg-white text-slate-900 shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-slate-950 shadow-sm"
+                    : "text-slate-400 hover:text-white"
                 }`}
               >
                 {tab.icon}
@@ -80,12 +80,12 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
         <div className="flex items-center gap-2.5">
           {user ? (
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-xs">
-                <div className="w-6 h-6 rounded-md bg-slate-800 flex items-center justify-center text-white font-mono text-[11px]">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 text-xs text-white">
+                <div className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-300 font-mono flex items-center justify-center text-[11px] font-bold">
                   {user.full_name?.charAt(0) || "U"}
                 </div>
                 <div className="text-left hidden sm:block">
-                  <p className="font-medium text-slate-900 leading-tight text-xs">{user.full_name}</p>
+                  <p className="font-semibold text-white leading-tight text-xs">{user.full_name}</p>
                 </div>
               </div>
 
@@ -93,7 +93,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
                 type="button"
                 onClick={logout}
                 title="Sign out"
-                className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-rose-600 hover:bg-slate-50 transition-colors"
+                className="p-2 rounded-xl border border-white/10 bg-white/5 text-slate-400 hover:text-rose-400 hover:border-rose-500/30 transition-all duration-200"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -103,14 +103,14 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({
               <button
                 type="button"
                 onClick={() => router.push("/login")}
-                className="h-8 px-3 text-xs font-medium text-slate-700 hover:text-slate-900 transition-colors"
+                className="h-9 px-4 text-xs font-semibold text-slate-300 hover:text-white transition-colors"
               >
                 Sign In
               </button>
               <button
                 type="button"
                 onClick={() => router.push("/register")}
-                className="h-8 px-3 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-1.5"
+                className="h-9 px-4 text-xs font-bold text-slate-950 bg-white hover:bg-slate-200 rounded-xl transition-all duration-200 flex items-center gap-1.5"
               >
                 <span>Register</span>
                 <ArrowRight className="w-3.5 h-3.5" />
